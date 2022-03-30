@@ -1,0 +1,8 @@
+.ionide
+.vs
+
+**/*.fs.js
+**/*.fs.js.map
+**/obj
+**/bin
+node_modules
