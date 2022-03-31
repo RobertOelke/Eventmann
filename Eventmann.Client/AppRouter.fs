@@ -3,22 +3,21 @@
 open Feliz
 open Feliz.Bulma
 open Feliz.Router
+open Eventmann.Client.Page
 
 module AppRouter =
   
   [<ReactComponent>]
   let Content (url) =
-    Bulma.container [
-      container.isWidescreen
-      
+    Bulma.section [
       prop.style [
-        style.marginTop 10
-        style.marginBottom 10
+        style.flexGrow 1
       ]
 
       prop.children [
         match url with
         | [] -> Html.text "Home"
+        | [ "machinetype" ] -> MachineTypePage.Render()
         | _ ->  Html.text "Not found"
       ]
     ]

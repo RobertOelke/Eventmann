@@ -5,4 +5,10 @@
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
   </PropertyGroup>
 
+  <ItemGroup>
+    <Compile Include="MachineType\Aggregate.fs" />
+    <Compile Include="MachineType\Projections.fs" />
+    <Compile Include="MachineType\Commands.fs" />
+  </ItemGroup>
+
 </Project>

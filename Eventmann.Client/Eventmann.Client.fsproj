@@ -5,6 +5,7 @@
     <ItemGroup>
 		<None Include="styles/global.scss" />
 		<None Include="index.html" />
+		<Compile Include="Pages\MachineTypePage.fs" />
         <Compile Include="AppMenu.fs" />
         <Compile Include="AppRouter.fs" />
         <Compile Include="AppFooter.fs" />
@@ -21,5 +22,8 @@
         <PackageReference Include="Fable.DateFunctions" Version="3.8.1" />
         <PackageReference Include="Feliz.UseDeferred" Version="1.4.1" />
         <PackageReference Include="Feliz.UseElmish" Version="1.6.0" />
+    </ItemGroup>
+    <ItemGroup>
+      <ProjectReference Include="..\Eventmann.Shared\Eventmann.Shared.fsproj" />
     </ItemGroup>
 </Project>
