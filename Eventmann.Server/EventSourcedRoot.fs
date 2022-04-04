@@ -33,6 +33,20 @@ module EventSourcedRoot =
           })
       }
 
+    let history _ uid : Async<History list> =
+      async {
+        let store = store :> IAggregateStore<MachineType, MachineTypeEvent>
+        let! events = store.GetStream uid
+
+        return
+          events
+          |> List.map (fun e -> {
+            Date = e.RecordedAtUtc
+            Action = sprintf "%A" e.Event
+          })
+          |> List.sortBy (fun h -> h.Date)
+      }
+
     let commandHandler (src : EventSource) (cmd : MachineTypeCommand) =
       async {
         let store = store :> IAggregateStore<MachineType, MachineTypeEvent>
@@ -52,5 +66,6 @@ module EventSourcedRoot =
     |> EventSourced.addProducer MachineType.store
     |> EventSourced.addQueryHandler MachineType.overView
     |> EventSourced.addQueryHandler MachineType.details
+    |> EventSourced.addQueryHandler MachineType.history
     |> EventSourced.addCommandHandler MachineType.commandHandler
     |> EventSourced.build

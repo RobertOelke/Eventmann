@@ -9,6 +9,46 @@ open Eventmann.Client
 open Eventmann.Shared
 open Eventmann.Shared.MachineType
 
+module MachineTypeCreate =
+
+  [<ReactComponent>]
+  let Render save cancel =
+    let main, setMain = React.useState("")
+    let sub, setSub = React.useState("")
+    Bulma.box [
+      Bulma.section [
+        Bulma.field.div [
+          Bulma.label "Main type"
+          Bulma.input.text [
+            prop.value main
+            prop.onTextChange setMain
+          ]
+        ]
+        Bulma.field.div [
+          Bulma.label "Sub type"
+          Bulma.input.text [
+            prop.value sub
+            prop.onTextChange setSub
+          ]
+        ]
+        Bulma.field.div [
+          Bulma.buttons [
+            Bulma.button.button [
+              if main = "" || sub = "" then
+                prop.disabled true
+
+              prop.text "Create"
+              prop.onClick (fun _ -> save (main, sub))
+            ]
+            Bulma.button.button [
+              prop.text "Cancel"
+              prop.onClick (fun _ -> cancel ())
+            ]
+          ]
+        ]
+      ]
+    ]
+
 module MachineTypeDetails =
 
   type StateDif = {
@@ -245,49 +285,39 @@ module MachineTypeDetails =
       ]
     ]
 
-module MachineTypePage =
+module MachineTypeHistory =
+  
+  let loadLog uid setter () =
+    async {
+      let! logs = Apis.machineType.GetLog uid
+      setter logs
+      return ()
+    } |> Async.StartImmediate
 
   [<ReactComponent>]
-  let RenderCreate save cancel =
-    let main, setMain = React.useState("")
-    let sub, setSub = React.useState("")
-    Bulma.box [
-      Bulma.section [
-        Bulma.field.div [
-          Bulma.label "Main type"
-          Bulma.input.text [
-            prop.value main
-            prop.onTextChange setMain
-          ]
-        ]
-        Bulma.field.div [
-          Bulma.label "Sub type"
-          Bulma.input.text [
-            prop.value sub
-            prop.onTextChange setSub
-          ]
-        ]
-        Bulma.field.div [
-          Bulma.buttons [
-            Bulma.button.button [
-              if main = "" || sub = "" then
-                prop.disabled true
+  let Render (uid : Guid) (close : unit -> unit) =
+    let log, setLog = React.useState([])
 
-              prop.text "Create"
-              prop.onClick (fun _ -> save (main, sub))
-            ]
-            Bulma.button.button [
-              prop.text "Cancel"
-              prop.onClick (fun _ -> cancel ())
-            ]
+    React.useEffectOnce(loadLog uid setLog)
+
+    Bulma.box [
+      Bulma.section (log |> List.map (fun l -> Html.div [ Html.textf "%s- %s:  %s" (l.Date.ToShortDateString()) (l.Date.ToShortTimeString()) l.Action ]))
+      Bulma.field.div [
+        Bulma.buttons [
+          Bulma.button.button [
+            prop.text "Close"
+            prop.onClick (fun _ -> close ())
           ]
         ]
       ]
     ]
 
+module MachineTypePage =
+
   type Popup =
   | Empty
   | Create
+  | History of Guid
   | Edit of Guid
 
   type State = {
@@ -310,6 +340,7 @@ module MachineTypePage =
   | ClosePopup
   | Delete of Guid
   | StartEdit of Guid
+  | ShowHistory of Guid
 
   let update msg state = 
     match msg with
@@ -346,6 +377,9 @@ module MachineTypePage =
     | StartEdit uid ->
       { state with Popup = Edit uid }, Cmd.none
 
+    | ShowHistory uid ->
+      { state with Popup = History uid }, Cmd.none
+
   [<ReactComponent>]
   let Render() =
     let state, dispatch = React.useElmish((fun () -> (empty, Cmd.ofMsg Load)), update)
@@ -371,11 +405,15 @@ module MachineTypePage =
               match state.Popup with
               | Empty -> React.fragment []
               | Create -> 
-                RenderCreate
+                MachineTypeCreate.Render
                   (fun (m, s) -> {| Main = m; Sub = s |} |> FinishCreate |> dispatch)  
                   (fun () -> ClosePopup |> dispatch)
               | Edit uid ->
                 MachineTypeDetails.Render
+                  uid
+                  (fun () -> ClosePopup |> dispatch)
+              | History uid ->
+                MachineTypeHistory.Render
                   uid
                   (fun () -> ClosePopup |> dispatch)
             ]
@@ -429,6 +467,13 @@ module MachineTypePage =
                         prop.onClick (fun _ -> machineType.Id |> Delete |> dispatch)
                         prop.children [
                           Bulma.icon [ Html.i [ prop.className "fas fa-trash" ] ]
+                        ]
+                      ]
+                      Bulma.button.button [
+                        button.isSmall
+                        prop.onClick (fun _ -> machineType.Id |> ShowHistory |> dispatch)
+                        prop.children [
+                          Bulma.icon [ Html.i [ prop.className "fas fa-clock-rotate-left" ] ]
                         ]
                       ]
                     ]

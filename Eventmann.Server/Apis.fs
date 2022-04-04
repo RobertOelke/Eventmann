@@ -52,11 +52,19 @@ module Apis =
           printfn "Error: %s" exn.Message
       }
 
+    let getLog (uid : EventSource) : Async<History list> =
+      async {
+        match! queryHandler.TryHandle uid with
+        | QueryResult.Ok ok -> return ok
+        | _ -> return []
+      }
+
     let api : MachineTypeApi = {
       GetAll = getAll
       GetDetails = getDetails
       Update = update
       Create = fun args -> create args.MainType args.SubType
+      GetLog = getLog
     }
 
     Remoting.createApi ()

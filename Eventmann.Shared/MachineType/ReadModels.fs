@@ -21,3 +21,8 @@ type MachineTypeDetail = {
   Montage : int option
   Shipping : int option
 }
+
+type History = {
+  Date : DateTime
+  Action : string
+}

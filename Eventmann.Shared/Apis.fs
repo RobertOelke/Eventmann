@@ -8,4 +8,5 @@ type MachineTypeApi = {
   GetDetails : Guid -> Async<MachineTypeDetail option>
   Update : Guid -> MachineTypeCommand -> Async<unit>
   Create : {| MainType : string; SubType : string |} -> Async<unit>
+  GetLog : Guid -> Async<History list>
 }
