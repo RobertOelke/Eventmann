@@ -1,15 +1,41 @@
 open System
 open Microsoft.AspNetCore.Builder
 open Microsoft.Extensions.Hosting
+open Microsoft.Extensions.Logging
+
+open Giraffe
+open Kairos.Server
+open Eventmann.Server
+open Eventmann.Server.MachineType
 
 [<EntryPoint>]
 let main args =
-    let builder = WebApplication.CreateBuilder(args)
-    let app = builder.Build()
 
-    app.MapGet("/", Func<string>(fun () -> "Hello World!")) |> ignore
+  let webApp =
+    choose [
+      subRoute "/api" (choose [
+        Apis.machineType EventSourcedRoot.cmd EventSourcedRoot.query
+      ])
+    ]
 
-    app.Run()
+  let builder = WebApplication.CreateBuilder(args)
+  builder.Services
+    .AddGiraffe()
+    |> ignore
+    
+  builder.Logging
+    .ClearProviders()
+    .AddDebug()
+    .AddConsole()
+    |> ignore
 
-    0 // Exit code
+  let app = builder.Build()
+  app.UseGiraffe(webApp)
+  app.UseHttpLogging() |> ignore
+
+  app.MapGet("/", Func<string>(fun () -> "Hello World!")) |> ignore
+
+  app.Run()
+
+  0 // Exit code
 

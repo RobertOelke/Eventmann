@@ -5,11 +5,21 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="Domain\MachineType.fs" />
+    <Compile Include="MachineType\Aggregate.fs" />
+    <Compile Include="MachineType\MachineTypeOverview.fs" />
+    <Compile Include="EventSourcedRoot.fs" />
+    <Compile Include="Apis.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Fable.Remoting.Giraffe" Version="5.9.0" />
+    <PackageReference Include="Giraffe" Version="5.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Kairos\src\Kairos.Server.Remoting\Kairos.Server.Remoting.fsproj" />
+    <ProjectReference Include="..\..\Kairos\src\Kairos.Server\Kairos.Server.fsproj" />
     <ProjectReference Include="..\Eventmann.Shared\Eventmann.Shared.fsproj" />
   </ItemGroup>
 
