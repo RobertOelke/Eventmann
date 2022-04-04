@@ -16,6 +16,6 @@ module AppFooter =
         style.flexGrow 0
       ]
       prop.children [
-        Html.text "Footer"
+        Html.text "Eventmann - Version 0.1"
       ]
     ]

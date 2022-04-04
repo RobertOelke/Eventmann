@@ -18,6 +18,7 @@ module AppRouter =
         match url with
         | [] -> Html.text "Home"
         | [ "machinetype" ] -> MachineTypePage.Render()
+        | [ "add-order" ] -> AddOrderPage.Render()
         | _ ->  Html.text "Not found"
       ]
     ]

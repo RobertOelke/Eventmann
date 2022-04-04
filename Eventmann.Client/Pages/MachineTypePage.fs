@@ -389,7 +389,7 @@ module MachineTypePage =
         pageLoader.isSuccess
         pageLoader.isActive
         prop.children [
-          PageLoader.title "I am loading some awesomeness"
+          PageLoader.title "Loading machine types"
         ]
       ]
     else

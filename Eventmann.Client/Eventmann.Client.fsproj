@@ -6,6 +6,7 @@
 		<None Include="styles/global.scss" />
 		<None Include="index.html" />
 		<Compile Include="Apis.fs" />
+		<Compile Include="Pages\AddOrderPage.fs" />
 		<Compile Include="Pages\MachineTypePage.fs" />
         <Compile Include="AppMenu.fs" />
         <Compile Include="AppRouter.fs" />
