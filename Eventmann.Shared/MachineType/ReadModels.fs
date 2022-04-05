@@ -15,11 +15,11 @@ type MachineTypeDetail = {
   MainType : string
   SubType : string
   Examples : string list
-  Colour : string option
-  Sketch : int option
-  Construction : int option
-  Montage : int option
-  Shipping : int option
+  Colour : string
+  Sketch : int
+  Construction : int
+  Montage : int
+  Shipping : int
 }
 
 type History = {

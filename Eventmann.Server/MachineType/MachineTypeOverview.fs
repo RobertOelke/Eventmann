@@ -39,10 +39,14 @@ module MachineTypeOverview =
         models
         |> List.filter (fun x -> x.Id <> event.Source)
 
-      | SketchDurationChanged _
-      | ConstructionDurationChanged _
-      | MontageDurationChanged _
-      | ShippingDurationChanged _ -> models
+      | SketchExtended _
+      | SketchShortened _
+      | ConstructionExtended _
+      | ConstructionShortened _
+      | MontageExtended _
+      | MontageShortened _
+      | ShippingExtended _
+      | ShippingShortened _ -> models
 
     let update models = function
       | NewEvent event ->

@@ -21,6 +21,7 @@ module EventSourcedRoot =
         let! x = store.GetAggregate uid
         return
           x
+          |> Option.filter (fun a -> not a.State.IsDeleted)
           |> Option.map(fun a -> {
             Id = a.Source
             MainType = a.State.MainType

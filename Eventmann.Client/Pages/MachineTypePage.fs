@@ -101,16 +101,16 @@ module MachineTypeDetails =
     | NewExampleChanged str ->
       { state with NewExample = str }, Cmd.none
     | ChangeColour colour ->
-      updateCurrent (fun s -> { s with Colour = Some colour }), Cmd.none
+      updateCurrent (fun s -> { s with Colour = colour }), Cmd.none
 
     | ChangeSketch sketch ->
-      updateCurrent (fun s -> { s with Sketch = Some sketch }), Cmd.none
+      updateCurrent (fun s -> { s with Sketch = sketch }), Cmd.none
     | ChangeConstruction construction ->
-      updateCurrent (fun s -> { s with Construction = Some construction }), Cmd.none
+      updateCurrent (fun s -> { s with Construction = construction }), Cmd.none
     | ChangeMontage montage ->
-      updateCurrent (fun s -> { s with Montage = Some montage }), Cmd.none
+      updateCurrent (fun s -> { s with Montage = montage }), Cmd.none
     | ChangeShipping shipping ->
-      updateCurrent (fun s -> { s with Shipping = Some shipping }), Cmd.none
+      updateCurrent (fun s -> { s with Shipping = shipping }), Cmd.none
 
     | UpdateDuration ->
       let update () =
@@ -118,16 +118,16 @@ module MachineTypeDetails =
           match state.State with
           | Some { Original = o; Current = c } ->
             if (o.Sketch <> c.Sketch) then
-              do! Apis.machineType.Update state.Uid (ChangeSketchDuration (c.Sketch |> Option.defaultValue 0))
+              do! Apis.machineType.Update state.Uid (ChangeSketchDuration c.Sketch)
 
             if (o.Construction <> c.Construction) then
-              do! Apis.machineType.Update state.Uid (ChangeConstructionDuration (c.Construction |> Option.defaultValue 0))
+              do! Apis.machineType.Update state.Uid (ChangeConstructionDuration c.Construction)
 
             if (o.Montage <> c.Montage) then
-              do! Apis.machineType.Update state.Uid (ChangeMontageDuration (c.Montage |> Option.defaultValue 0))
+              do! Apis.machineType.Update state.Uid (ChangeMontageDuration c.Montage)
 
             if (o.Shipping <> c.Shipping) then
-              do! Apis.machineType.Update state.Uid (ChangeShippingDuration (c.Shipping |> Option.defaultValue 0))
+              do! Apis.machineType.Update state.Uid (ChangeShippingDuration c.Shipping)
 
           | None -> ()
 
@@ -216,7 +216,7 @@ module MachineTypeDetails =
                   prop.children [
                     Bulma.input.text [
                       prop.disabled loading
-                      prop.value (current.Colour |> Option.defaultValue "")
+                      prop.value current.Colour
                       prop.onTextChange (ChangeColour >> dispatch)
                     ]
                   ]
@@ -225,16 +225,11 @@ module MachineTypeDetails =
                   Bulma.button.button [
                     prop.style [
                       style.color "white"
-                      match current.Colour with
-                      | None -> style.backgroundColor "black"
-                      | Some c -> style.backgroundColor c
+                      style.backgroundColor current.Colour
                     ]
-                   
-                    prop.disabled (loading || (current.Colour = original.Colour) || current.Colour.IsNone)
+                    prop.disabled (loading || current.Colour = original.Colour || current.Colour = "")
                     prop.text "Change"
-                    match current.Colour with
-                    | Some c -> prop.onClick (fun _ -> c |> MachineTypeCommand.ChangeColour |> Update |> dispatch)
-                    | None -> ()
+                    prop.onClick (fun _ -> current.Colour |> MachineTypeCommand.ChangeColour |> Update |> dispatch)
                   ]
                 ]
               ]
@@ -244,14 +239,14 @@ module MachineTypeDetails =
             
             Bulma.label "Duration"
 
-            let duration (label : string) (value : int option) msg =
+            let duration (label : string) (value : int) msg =
               React.fragment [
                 Html.p label
                 Bulma.field.div [
                   Bulma.input.number [
                     input.isSmall
                     prop.disabled loading
-                    prop.value (value |> Option.defaultValue 0)
+                    prop.value value
                     prop.onTextChange (int >> msg >> dispatch)
                   ]
                 ]
