@@ -5,7 +5,9 @@ open Fable.Remoting.Server
 open Fable.Remoting.Giraffe
 open Eventmann.Shared
 open Eventmann.Shared.MachineType
+open Eventmann.Shared.Order
 open Eventmann.Server.MachineType
+open Eventmann.Server.Order
 open Kairos.Server
 
 module Apis =
@@ -70,4 +72,28 @@ module Apis =
     Remoting.createApi ()
     |> Remoting.fromValue api
     |> Remoting.withRouteBuilder(fun t m -> sprintf "/machine-type/%s" m)
+    |> Remoting.buildHttpHandler
+
+  let order (cmdHandler : ICommandHandler) (queryHandler : IQueryHandler) =
+  
+    let create (cmd : OrderCommand) =
+      async {
+        let! creationResult = cmdHandler.Handle (Guid.NewGuid(), cmd)
+        match creationResult with
+        | CommandResult.Ok -> ()
+        | CommandResult.Rejected ->
+          printfn "Rejected"
+        | CommandResult.NoHandler t -> 
+          printfn "NoHandler: %s" t.Name
+        | CommandResult.Error exn ->
+          printfn "Error: %s" exn.Message
+      }
+  
+    let api : OrderApi = {
+      PlaceOrder = OrderCommand.PlaceOrder >> create
+    }
+
+    Remoting.createApi ()
+    |> Remoting.fromValue api
+    |> Remoting.withRouteBuilder(fun t m -> sprintf "/order/%s" m)
     |> Remoting.buildHttpHandler

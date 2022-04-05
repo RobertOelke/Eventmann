@@ -9,3 +9,8 @@ module Apis =
     |> Remoting.withRouteBuilder (fun t m -> sprintf "/api/machine-type/%s" m)
     |> Remoting.buildProxy<MachineTypeApi>
 
+  let order =
+    Remoting.createApi()
+    |> Remoting.withRouteBuilder (fun t m -> sprintf "/api/order/%s" m)
+    |> Remoting.buildProxy<OrderApi>
+

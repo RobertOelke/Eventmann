@@ -15,6 +15,7 @@ let main args =
     choose [
       subRoute "/api" (choose [
         Apis.machineType EventSourcedRoot.cmd EventSourcedRoot.query
+        Apis.order EventSourcedRoot.cmd EventSourcedRoot.query
       ])
     ]
 

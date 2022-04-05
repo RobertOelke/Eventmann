@@ -6,6 +6,8 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="Order\ReadModels.fs" />
+    <Compile Include="Order\Commands.fs" />
     <Compile Include="MachineType\ReadModels.fs" />
     <Compile Include="MachineType\Commands.fs" />
     <Compile Include="Apis.fs" />

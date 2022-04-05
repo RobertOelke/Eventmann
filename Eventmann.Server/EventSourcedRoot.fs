@@ -4,13 +4,14 @@ open System
 open Fable.Remoting.Server
 open Fable.Remoting.Giraffe
 open Eventmann.Shared.MachineType
+open Eventmann.Shared.Order
 open Eventmann.Server.MachineType
+open Eventmann.Server.Order
 open Kairos.Server
 
 module EventSourcedRoot =
   module private MachineType =
-    let store =
-      new InMemoryAggregateStore<MachineType, MachineTypeEvent>(MachineType.zero, MachineType.project)
+    let store = new InMemoryAggregateStore<MachineType, MachineTypeEvent>(MachineType.zero, MachineType.project)
       
     let overView = MachineTypeOverview.machineTypeOverview
 
@@ -61,11 +62,33 @@ module EventSourcedRoot =
           return CommandResult.Error exn
       }
 
+  module private Order =
+    let store = new InMemoryAggregateStore<Order, OrderEvent>(Order.zero, Order.project)
+
+    let commandHandler (src : EventSource) (cmd : OrderCommand) =
+      async {
+        let store = store :> IAggregateStore<Order, OrderEvent>
+        let! aggregate = store.GetAggregate src
+        match OrderCommand.commandHandler (aggregate |> Option.map (fun a -> a.State)) cmd with
+        | Accepted events ->
+          do! store.Append { StreamSource = src; ExpectedVersion = None; Events = events }
+          return CommandResult.Ok
+        | Rejected _ ->
+          return CommandResult.Rejected
+        | Failed exn ->
+          return CommandResult.Error exn
+      }
+
   let cmd, query =
     EventSourced.create()
+    // MachineType
     |> EventSourced.addProducer MachineType.store
     |> EventSourced.addQueryHandler MachineType.overView
     |> EventSourced.addQueryHandler MachineType.details
     |> EventSourced.addQueryHandler MachineType.history
     |> EventSourced.addCommandHandler MachineType.commandHandler
+    // Order
+    |> EventSourced.addProducer Order.store
+    |> EventSourced.addCommandHandler Order.commandHandler
+    // Build
     |> EventSourced.build
