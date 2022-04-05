@@ -2,11 +2,12 @@
 
 open Feliz
 open Feliz.Bulma
+open Feliz.Router
 
 module AppMenu =
 
   [<ReactComponent>]
-  let Render() =
+  let Render (currentUrl : string list) =
     Bulma.navbar [
       color.isPrimary
       prop.children [
@@ -16,15 +17,23 @@ module AppMenu =
           ]
         ]
         Bulma.navbarMenu [
-          Bulma.navbarStart.div [
-            let link (t : string) (url : string array) =
-              Bulma.navbarItem.a [
-                prop.text t
-                prop.onClick (fun _ -> Router.Router.navigate url)
-              ]
+          let link (t : string) (url : string array) =
+            Bulma.navbarItem.a [
+              if (List.ofArray url) = currentUrl then
+                navbarItem.isActive
 
+              prop.text t
+              prop.onClick (fun _ -> Router.Router.navigate url)
+            ]
+          Bulma.navbarStart.div [
             link "Machine Types" [| "machinetype" |]
             link "Add Order" [| "add-order" |]
+            link "New Orders" [| "new-orders" |]
+            link "Sketch" [| "sketch" |]
+            link "Construction" [| "construction" |]
+            link "Montage" [| "montage" |]
+            link "Shipping" [| "shipping" |]
+            link "Completed Orders" [| "completed-orders" |]
           ]
         ]
       ]

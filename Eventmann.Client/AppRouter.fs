@@ -19,14 +19,18 @@ module AppRouter =
         | [] -> Html.text "Home"
         | [ "machinetype" ] -> MachineTypePage.Render()
         | [ "add-order" ] -> AddOrderPage.Render()
+        | [ "new-orders" ] -> NewOrdersPage.Render()
+        | [ "sketch" ] -> SketchPage.Render()
+        | [ "construction" ] -> ConstructionPage.Render()
+        | [ "montage" ] -> MontagePage.Render()
+        | [ "shipping" ] -> ShippingPage.Render()
+        | [ "completed-orders" ] -> CompletedOrdersPage.Render()
         | _ ->  Html.text "Not found"
       ]
     ]
 
   [<ReactComponent>]
-  let Render() =
-    let url, setUrl = React.useState(Router.currentUrl)
-
+  let Render url setUrl =
     React.router [
       router.onUrlChanged setUrl
       router.children (Content url)
