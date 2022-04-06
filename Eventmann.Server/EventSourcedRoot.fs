@@ -8,12 +8,15 @@ open Eventmann.Shared.Order
 open Eventmann.Server.MachineType
 open Eventmann.Server.Order
 open Kairos.Server
+open Kairos.Server.MsSql
 
 module EventSourcedRoot =
+  let [<Literal>] connectionString = "Server=.\SQLExpress;Database=Eventmann;Trusted_Connection=Yes;"
+
   module private MachineType =
-    let store = new InMemoryAggregateStore<MachineType, MachineTypeEvent>(MachineType.zero, MachineType.project)
+    let store = new SqlAggregateStore<MachineType, MachineTypeEvent>(connectionString, MachineType.defaultProjection)
       
-    let overView = MachineTypeOverview.machineTypeOverview
+    let overView = MachineTypeOverview.machineTypeOverview connectionString
 
     let details _ uid =
       let store = store :> IAggregateStore<MachineType, MachineTypeEvent>
@@ -64,7 +67,7 @@ module EventSourcedRoot =
       }
 
   module private Order =
-    let store = new InMemoryAggregateStore<Order, OrderEvent>(Order.zero, Order.project)
+    let store = new SqlAggregateStore<Order, OrderEvent>(connectionString,Order.defaultProjection)
 
     let commandHandler (src : EventSource) (cmd : OrderCommand) =
       async {

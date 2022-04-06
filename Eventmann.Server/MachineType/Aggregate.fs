@@ -32,32 +32,35 @@ type MachineType = {
 }
 
 module MachineType =
-  let zero = {
-    MainType = ""
-    SubType = ""
-    Examples = []
-    Colour = "black"
-    Sketch = 0
-    Construction = 0
-    Montage = 0
-    Shipping = 0
-    IsDeleted = false
-  }
+  let defaultProjection : Projection<MachineType, MachineTypeEvent> =
+    let zero = {
+      MainType = ""
+      SubType = ""
+      Examples = []
+      Colour = "black"
+      Sketch = 0
+      Construction = 0
+      Montage = 0
+      Shipping = 0
+      IsDeleted = false
+    }
 
-  let project state = function
-    | Created args -> { zero with MainType = args.MainType; SubType = args.SubType }
-    | ExampleAdded args -> { state with Examples = state.Examples @ [ args.Example ] }
-    | ExampleRemoved args -> { state with Examples = state.Examples |> List.filter ((<>) args.Example)}
-    | ColourChanged args -> { state with Colour = args.Colour }
-    | SketchExtended args -> { state with Sketch = state.Sketch + args.Days }
-    | SketchShortened args -> { state with Sketch = state.Sketch - args.Days }
-    | ConstructionExtended args -> { state with Construction = state.Construction + args.Days }
-    | ConstructionShortened args -> { state with Construction = state.Construction - args.Days }
-    | MontageExtended args -> { state with Montage = state.Montage + args.Days } 
-    | MontageShortened args -> { state with Montage = state.Montage - args.Days }
-    | ShippingExtended args -> { state with Shipping = state.Shipping + args.Days }
-    | ShippingShortened args -> { state with Shipping = state.Shipping - args.Days }
-    | Deleted -> { state with IsDeleted = true }
+    let update state = function
+      | Created args -> { zero with MainType = args.MainType; SubType = args.SubType }
+      | ExampleAdded args -> { state with Examples = state.Examples @ [ args.Example ] }
+      | ExampleRemoved args -> { state with Examples = state.Examples |> List.filter ((<>) args.Example)}
+      | ColourChanged args -> { state with Colour = args.Colour }
+      | SketchExtended args -> { state with Sketch = state.Sketch + args.Days }
+      | SketchShortened args -> { state with Sketch = state.Sketch - args.Days }
+      | ConstructionExtended args -> { state with Construction = state.Construction + args.Days }
+      | ConstructionShortened args -> { state with Construction = state.Construction - args.Days }
+      | MontageExtended args -> { state with Montage = state.Montage + args.Days } 
+      | MontageShortened args -> { state with Montage = state.Montage - args.Days }
+      | ShippingExtended args -> { state with Shipping = state.Shipping + args.Days }
+      | ShippingShortened args -> { state with Shipping = state.Shipping - args.Days }
+      | Deleted -> { state with IsDeleted = true }
+
+    { Zero = zero ; Update = update }
 
 module MachineTypeCommand =
   let commandHandler (state : MachineType option) (cmd : MachineTypeCommand) =

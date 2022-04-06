@@ -478,7 +478,7 @@ module MachineTypePage =
                     prop.style [ style.color machineType.Colour]
                     prop.text machineType.SubType
                   ]
-                  Html.td (String.Join(", ", machineType.Examples))
+                  Html.td machineType.Examples
                 ]
             ]
           ]

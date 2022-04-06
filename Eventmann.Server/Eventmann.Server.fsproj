@@ -14,12 +14,13 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Dapper" Version="2.0.123" />
     <PackageReference Include="Fable.Remoting.Giraffe" Version="5.9.0" />
     <PackageReference Include="Giraffe" Version="5.0.0" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\Kairos\src\Kairos.Server.Remoting\Kairos.Server.Remoting.fsproj" />
+    <ProjectReference Include="..\..\Kairos\src\Kairos.Server.MsSql\Kairos.Server.MsSql.fsproj" />
     <ProjectReference Include="..\..\Kairos\src\Kairos.Server\Kairos.Server.fsproj" />
     <ProjectReference Include="..\Eventmann.Shared\Eventmann.Shared.fsproj" />
   </ItemGroup>

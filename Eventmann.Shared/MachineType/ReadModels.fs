@@ -2,11 +2,12 @@
 
 open System
 
+[<CLIMutable>]
 type MachineTypeOverview = {
   Id : Guid
   MainType : string
   SubType : string
-  Examples : string list
+  Examples : string
   Colour : string
 }
 
