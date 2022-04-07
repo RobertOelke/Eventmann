@@ -47,8 +47,8 @@ module OrderCommand =
           OrderPlaced {|
             SerialNumber = order.SerialNumber
             Customer = order.Customer
-            MachineName = order.MachineName
-            MachineType = order.MachineType
+            MachineName = order.ModelName
+            MachineType = order.VacuumType
             DeliveryDate = order.DeliveryDate
           |}
         ]

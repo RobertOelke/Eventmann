@@ -4,10 +4,10 @@ open Eventmann.Shared
 open Fable.Remoting.Client
 
 module Apis =
-  let machineType =
+  let vacuumType =
     Remoting.createApi()
-    |> Remoting.withRouteBuilder (fun t m -> sprintf "/api/machine-type/%s" m)
-    |> Remoting.buildProxy<MachineTypeApi>
+    |> Remoting.withRouteBuilder (fun t m -> sprintf "/api/vacuum-type/%s" m)
+    |> Remoting.buildProxy<VacuumTypeApi>
 
   let order =
     Remoting.createApi()

@@ -6,7 +6,6 @@ open Microsoft.Extensions.Logging
 open Giraffe
 open Kairos.Server
 open Eventmann.Server
-open Eventmann.Server.MachineType
 
 [<EntryPoint>]
 let main args =

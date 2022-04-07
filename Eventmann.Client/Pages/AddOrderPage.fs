@@ -6,29 +6,29 @@ open Feliz.Bulma
 open Eventmann.Client
 open Eventmann.Shared
 open Eventmann.Shared.Order
-open Eventmann.Shared.MachineType
+open Eventmann.Shared.VacuumType
 
 module AddOrderPage =
   
   type State = {
     SerialNumber : string
     Customer : string
-    MachineName : string
-    MachineType : Guid
+    ModelName : string
+    VacuumType : Guid
     DeliveryDate : DateTime option
   }
 
   let empty = {
     SerialNumber = ""
     Customer = ""
-    MachineName = ""
-    MachineType = Guid.Empty
+    ModelName = ""
+    VacuumType = Guid.Empty
     DeliveryDate = None
   }
 
   let loadMachineTypes setter () =
     async {
-      let! types = Apis.machineType.GetAll()
+      let! types = Apis.vacuumType.GetAll()
       setter types
     } |> Async.StartImmediate
 
@@ -58,28 +58,27 @@ module AddOrderPage =
         ]
       ]
       Bulma.field.div [
-        Bulma.label "Machine name"
+        Bulma.label "Model name"
         Bulma.input.text [
-          prop.value state.MachineName
-          prop.onTextChange (update (fun t s -> { s  with MachineName = t }))
+          prop.value state.ModelName
+          prop.onTextChange (update (fun t s -> { s  with ModelName = t }))
         ]
       ]
       Bulma.field.div [
-        Bulma.label "Machine type"
+        Bulma.label "Vaccum type"
         Bulma.control.div [
           prop.children [
             Bulma.select [
               select.isFullWidth
-              prop.value state.MachineType
-              prop.onChange (update (fun (value : string) s -> { s  with MachineType = Guid value }))
+              prop.value state.VacuumType
+              prop.onChange (update (fun (value : string) s -> { s  with VacuumType = Guid value }))
               prop.children [
                 yield!
                   machineTypes
-                  |> List.sortByDescending(fun m -> state.MachineName.StartsWith(m.MainType))
                   |> List.map (fun m ->
                     Html.option [
                       prop.value m.Id
-                      prop.text m.MainType
+                      prop.textf "%s (%s)" m.Name m.Category
                     ]
                   )
                 yield
@@ -107,18 +106,18 @@ module AddOrderPage =
             prop.text "Create"
             prop.disabled (
               state.DeliveryDate.IsNone
-              || state.MachineName = ""
+              || state.ModelName = ""
               || state.SerialNumber = ""
               || state.Customer = ""
-              || state.MachineType = Guid.Empty
+              || state.VacuumType = Guid.Empty
             )
             prop.onClick (fun _ ->
               async {
                 let newOrder : NewOrder = {
                   SerialNumber = state.SerialNumber
                   Customer = state.Customer
-                  MachineName = state.MachineName
-                  MachineType = state.MachineType
+                  ModelName = state.ModelName
+                  VacuumType = state.VacuumType
                   DeliveryDate = state.DeliveryDate.Value
                 }
                 do! Apis.order.PlaceOrder newOrder

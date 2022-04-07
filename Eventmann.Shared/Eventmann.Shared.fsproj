@@ -6,10 +6,10 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="Order\ReadModels.fs" />
     <Compile Include="Order\Commands.fs" />
-    <Compile Include="MachineType\ReadModels.fs" />
-    <Compile Include="MachineType\Commands.fs" />
+    <Compile Include="Order\Models.fs" />
+    <Compile Include="VacuumType\Commands.fs" />
+    <Compile Include="VacuumType\Models.fs" />
     <Compile Include="Apis.fs" />
   </ItemGroup>
 

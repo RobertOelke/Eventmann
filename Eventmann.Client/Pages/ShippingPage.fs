@@ -7,7 +7,7 @@ open Feliz.UseElmish
 open Feliz.Bulma
 open Eventmann.Client
 open Eventmann.Shared
-open Eventmann.Shared.MachineType
+open Eventmann.Shared.VacuumType
 
 module ShippingPage =
 

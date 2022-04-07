@@ -7,38 +7,38 @@ open Feliz.UseElmish
 open Feliz.Bulma
 open Eventmann.Client
 open Eventmann.Shared
-open Eventmann.Shared.MachineType
+open Eventmann.Shared.VacuumType
 
-module MachineTypeCreate =
+module VacuumTypeCreate =
 
   [<ReactComponent>]
   let Render save cancel =
-    let main, setMain = React.useState("")
-    let sub, setSub = React.useState("")
+    let category, setCategory = React.useState("")
+    let name, setName = React.useState("")
     Bulma.box [
       Bulma.section [
         Bulma.field.div [
-          Bulma.label "Main type"
+          Bulma.label "Category"
           Bulma.input.text [
-            prop.value main
-            prop.onTextChange setMain
+            prop.value category
+            prop.onTextChange setCategory
           ]
         ]
         Bulma.field.div [
-          Bulma.label "Sub type"
+          Bulma.label "Name"
           Bulma.input.text [
-            prop.value sub
-            prop.onTextChange setSub
+            prop.value name
+            prop.onTextChange setName
           ]
         ]
         Bulma.field.div [
           Bulma.buttons [
             Bulma.button.button [
-              if main = "" || sub = "" then
+              if category = "" || name = "" then
                 prop.disabled true
 
               prop.text "Create"
-              prop.onClick (fun _ -> save (main, sub))
+              prop.onClick (fun _ -> save (category, name))
             ]
             Bulma.button.button [
               prop.text "Cancel"
@@ -49,38 +49,38 @@ module MachineTypeCreate =
       ]
     ]
 
-module MachineTypeDetails =
+module VacuumTypeDetails =
 
   type StateDif = {
-    Original : MachineTypeDetail
-    Current : MachineTypeDetail
+    Original : VacuumType
+    Current : VacuumType
   }
 
   type State = {
     IsLoading : bool
     Uid : Guid
     State : StateDif option
-    NewExample : string
+    NewDescription : string
   }
 
   type Msg =
   | Load
-  | Loaded of MachineTypeDetail option
-  | NewExampleChanged of string
+  | Loaded of VacuumType option
+  | NewDescriptionChanged of string
   | ChangeColour of string
   | ChangeSketch of int
   | ChangeConstruction of int
   | ChangeMontage of int
   | ChangeShipping of int
   | UpdateDuration
-  | Update of MachineTypeCommand
+  | Update of VacuumTypeCommand
 
   let init uid () = 
     let empty = {
       IsLoading = false
       Uid = uid
       State = None
-      NewExample = ""
+      NewDescription = ""
     }
     empty, Cmd.ofMsg Load
 
@@ -92,14 +92,14 @@ module MachineTypeDetails =
 
     match msg with
     | Load ->
-      let loadData = Cmd.OfAsync.perform Apis.machineType.GetDetails state.Uid Loaded
+      let loadData = Cmd.OfAsync.perform Apis.vacuumType.GetDetails state.Uid Loaded
       { state with IsLoading = true }, loadData
     | Loaded (Some data) ->
       { state with IsLoading = false; State = Some { Original = data; Current = data } }, Cmd.none
     | Loaded None ->
       { state with IsLoading = false; State = None }, Cmd.none
-    | NewExampleChanged str ->
-      { state with NewExample = str }, Cmd.none
+    | NewDescriptionChanged str ->
+      { state with NewDescription = str }, Cmd.none
     | ChangeColour colour ->
       updateCurrent (fun s -> { s with Colour = colour }), Cmd.none
 
@@ -118,20 +118,20 @@ module MachineTypeDetails =
           match state.State with
           | Some { Original = o; Current = c } ->
             if (o.Sketch <> c.Sketch) then
-              do! Apis.machineType.Update state.Uid (ChangeSketchDuration c.Sketch)
+              do! Apis.vacuumType.Update state.Uid (ChangeSketchDuration c.Sketch)
 
             if (o.Construction <> c.Construction) then
-              do! Apis.machineType.Update state.Uid (ChangeConstructionDuration c.Construction)
+              do! Apis.vacuumType.Update state.Uid (ChangeConstructionDuration c.Construction)
 
             if (o.Montage <> c.Montage) then
-              do! Apis.machineType.Update state.Uid (ChangeMontageDuration c.Montage)
+              do! Apis.vacuumType.Update state.Uid (ChangeMontageDuration c.Montage)
 
             if (o.Shipping <> c.Shipping) then
-              do! Apis.machineType.Update state.Uid (ChangeShippingDuration c.Shipping)
+              do! Apis.vacuumType.Update state.Uid (ChangeShippingDuration c.Shipping)
 
           | None -> ()
 
-          return! Apis.machineType.GetDetails state.Uid
+          return! Apis.vacuumType.GetDetails state.Uid
         }
       
       { state with IsLoading = true }, Cmd.OfAsync.perform update () Loaded
@@ -139,11 +139,11 @@ module MachineTypeDetails =
     | Update cmd ->
       let update () =
         async {
-          do! Apis.machineType.Update state.Uid cmd
-          return! Apis.machineType.GetDetails state.Uid
+          do! Apis.vacuumType.Update state.Uid cmd
+          return! Apis.vacuumType.GetDetails state.Uid
         }
       
-      { state with IsLoading = true; NewExample = "" }, Cmd.OfAsync.perform update () Loaded
+      { state with IsLoading = true; NewDescription = "" }, Cmd.OfAsync.perform update () Loaded
 
   [<ReactComponent>]
   let Render (uid : Guid) (close : unit -> unit) =
@@ -156,11 +156,11 @@ module MachineTypeDetails =
         | false, None -> Html.text "Not found"
         | loading, Some { Original = original; Current = current } ->
           Bulma.field.div [
-            Bulma.label (sprintf "%s - %s" original.MainType original.SubType)
+            Bulma.label (sprintf "%s - %s" original.Category original.Name)
 
             Html.br []
 
-            Bulma.label "Examples"
+            Bulma.label "Descriptions"
             Bulma.field.div [
               field.hasAddons
               prop.children [
@@ -169,8 +169,8 @@ module MachineTypeDetails =
                   prop.children [
                     Bulma.input.text [
                       prop.disabled loading
-                      prop.value state.NewExample
-                      prop.onTextChange (NewExampleChanged >> dispatch)
+                      prop.value state.NewDescription
+                      prop.onTextChange (NewDescriptionChanged >> dispatch)
                     ]
                   ]
                 ]
@@ -178,26 +178,26 @@ module MachineTypeDetails =
                   Bulma.button.button [
                     prop.disabled loading
                     prop.text "Add"
-                    prop.onClick (fun _ -> dispatch (state.NewExample |> AddExample |> Update))
+                    prop.onClick (fun _ -> dispatch (state.NewDescription |> AddDescription |> Update))
                   ]
                 ]
               ]
             ]
             React.fragment (
-              original.Examples
-              |> List.map (fun example ->
+              original.Descriptions
+              |> List.map (fun description ->
                 Bulma.field.div [
                   field.hasAddons
                   prop.children [
                     Bulma.control.div [
                       control.isExpanded
-                      prop.text example
+                      prop.text description
                     ]
                     Bulma.control.div [
                       Bulma.button.button [
                         prop.disabled loading
                         prop.text "Delete"
-                        prop.onClick (fun _ -> dispatch (example |> RemoveExample |> Update))
+                        prop.onClick (fun _ -> dispatch (description |> RemoveDescription |> Update))
                       ]
                     ]
                   ]
@@ -229,7 +229,7 @@ module MachineTypeDetails =
                     ]
                     prop.disabled (loading || current.Colour = original.Colour || current.Colour = "")
                     prop.text "Change"
-                    prop.onClick (fun _ -> current.Colour |> MachineTypeCommand.ChangeColour |> Update |> dispatch)
+                    prop.onClick (fun _ -> current.Colour |> VacuumTypeCommand.ChangeColour |> Update |> dispatch)
                   ]
                 ]
               ]
@@ -280,11 +280,11 @@ module MachineTypeDetails =
       ]
     ]
 
-module MachineTypeHistory =
+module VacuumTypeHistory =
   
   let loadLog uid setter () =
     async {
-      let! logs = Apis.machineType.GetLog uid
+      let! logs = Apis.vacuumType.GetLog uid
       setter logs
       return ()
     } |> Async.StartImmediate
@@ -307,7 +307,7 @@ module MachineTypeHistory =
       ]
     ]
 
-module MachineTypePage =
+module VacuumTypePage =
 
   type Popup =
   | Empty
@@ -317,7 +317,7 @@ module MachineTypePage =
 
   type State = {
     IsLoading : bool
-    Data : MachineTypeOverview list
+    Data : VacuumTypeOverview list
     Popup : Popup
   }
 
@@ -329,7 +329,7 @@ module MachineTypePage =
 
   type Msg =
   | Load
-  | Loaded of MachineTypeOverview list
+  | Loaded of VacuumTypeOverview list
   | ShowCreate
   | FinishCreate of {| Main : string; Sub : string |}
   | ClosePopup
@@ -340,7 +340,7 @@ module MachineTypePage =
   let update msg state = 
     match msg with
     | Load ->
-      { state with IsLoading = true }, Cmd.OfAsync.perform Apis.machineType.GetAll () Loaded
+      { state with IsLoading = true }, Cmd.OfAsync.perform Apis.vacuumType.GetAll () Loaded
 
     | Loaded lst ->
       { state with IsLoading = false; Data = lst }, Cmd.none
@@ -351,8 +351,8 @@ module MachineTypePage =
     | FinishCreate args ->
       let async () =
         async {
-          do! Apis.machineType.Create {| MainType = args.Main; SubType = args.Sub |}
-          return! Apis.machineType.GetAll()
+          do! Apis.vacuumType.Create {| MainType = args.Main; SubType = args.Sub |}
+          return! Apis.vacuumType.GetAll()
         }
 
       { state with IsLoading = true; Popup = Empty }, Cmd.OfAsync.perform async () Loaded
@@ -360,14 +360,14 @@ module MachineTypePage =
     | Delete uid ->
       let async () =
         async {
-          do! Apis.machineType.Update uid MachineTypeCommand.Delete
-          return! Apis.machineType.GetAll()
+          do! Apis.vacuumType.Update uid VacuumTypeCommand.Delete
+          return! Apis.vacuumType.GetAll()
         }
 
       { state with IsLoading = true; Popup = Empty }, Cmd.OfAsync.perform async () Loaded
 
     | ClosePopup ->
-      { state with Popup = Empty }, Cmd.OfAsync.perform Apis.machineType.GetAll () Loaded
+      { state with Popup = Empty }, Cmd.OfAsync.perform Apis.vacuumType.GetAll () Loaded
 
     | StartEdit uid ->
       { state with Popup = Edit uid }, Cmd.none
@@ -384,7 +384,7 @@ module MachineTypePage =
         pageLoader.isSuccess
         pageLoader.isActive
         prop.children [
-          PageLoader.title "Loading machine types"
+          PageLoader.title "Loading vacuum types"
         ]
       ]
     else
@@ -400,15 +400,15 @@ module MachineTypePage =
               match state.Popup with
               | Empty -> React.fragment []
               | Create -> 
-                MachineTypeCreate.Render
+                VacuumTypeCreate.Render
                   (fun (m, s) -> {| Main = m; Sub = s |} |> FinishCreate |> dispatch)  
                   (fun () -> ClosePopup |> dispatch)
               | Edit uid ->
-                MachineTypeDetails.Render
+                VacuumTypeDetails.Render
                   uid
                   (fun () -> ClosePopup |> dispatch)
               | History uid ->
-                MachineTypeHistory.Render
+                VacuumTypeHistory.Render
                   uid
                   (fun () -> ClosePopup |> dispatch)
             ]
@@ -420,10 +420,10 @@ module MachineTypePage =
           prop.children [
             Html.thead [
               Html.tr [
-                Html.th "Actions"
+                Html.th ""
+                Html.th "Category"
                 Html.th "Name"
-                Html.th "CategoryName"
-                Html.th "Examples"
+                Html.th "Descriptions"
               ]
             ]
             Html.tfoot [
@@ -473,12 +473,12 @@ module MachineTypePage =
                       ]
                     ]
                   ]
-                  Html.td machineType.MainType
+                  Html.td machineType.Category
                   Html.td [
                     prop.style [ style.color machineType.Colour]
-                    prop.text machineType.SubType
+                    prop.text machineType.Name
                   ]
-                  Html.td machineType.Examples
+                  Html.td machineType.Descriptions
                 ]
             ]
           ]

@@ -3,9 +3,9 @@
 open System
 open Fable.Remoting.Server
 open Fable.Remoting.Giraffe
-open Eventmann.Shared.MachineType
+open Eventmann.Shared.VacuumType
 open Eventmann.Shared.Order
-open Eventmann.Server.MachineType
+open Eventmann.Server.VacuumType
 open Eventmann.Server.Order
 open Kairos.Server
 open Kairos.Server.MsSql
@@ -14,33 +14,23 @@ module EventSourcedRoot =
   let [<Literal>] connectionString = "Server=.\SQLExpress;Database=Eventmann;Trusted_Connection=Yes;"
 
   module private MachineType =
-    let store = new SqlAggregateStore<MachineType, MachineTypeEvent>(connectionString, MachineType.defaultProjection)
+    let store = new SqlAggregateStore<VacuumType, VacuumTypeEvent>(connectionString, VacuumType.projection)
       
-    let overView = MachineTypeOverview.machineTypeOverview connectionString
+    let overView = VacuumTypeOverview.vacuumTypeOverview connectionString
 
     let details _ uid =
-      let store = store :> IAggregateStore<MachineType, MachineTypeEvent>
+      let store = store :> IAggregateStore<VacuumType, VacuumTypeEvent>
       async {
-        let! x = store.GetAggregate uid
+        let! aggregate = store.GetAggregate uid
         return
-          x
+          aggregate
           |> Option.filter (fun a -> not a.State.IsDeleted)
-          |> Option.map(fun a -> {
-            Id = a.Source
-            MainType = a.State.MainType
-            SubType = a.State.SubType
-            Examples = a.State.Examples
-            Colour = a.State.Colour
-            Sketch = a.State.Sketch
-            Construction = a.State.Construction
-            Montage = a.State.Montage
-            Shipping = a.State.Shipping
-          })
+          |> Option.map(fun a -> a.State)
       }
 
-    let history _ uid : Async<History list> =
+    let history _ uid : Async<VacuumTypeHistory list> =
       async {
-        let store = store :> IAggregateStore<MachineType, MachineTypeEvent>
+        let store = store :> IAggregateStore<VacuumType, VacuumTypeEvent>
         let! events = store.GetStream uid
 
         return
@@ -52,11 +42,11 @@ module EventSourcedRoot =
           |> List.sortBy (fun h -> h.Date)
       }
 
-    let commandHandler (src : EventSource) (cmd : MachineTypeCommand) =
+    let commandHandler (src : EventSource) (cmd : VacuumTypeCommand) =
       async {
-        let store = store :> IAggregateStore<MachineType, MachineTypeEvent>
-        let! aggregate = store.GetAggregate src
-        match MachineTypeCommand.commandHandler (aggregate |> Option.map (fun a -> a.State)) cmd with
+        let store = store :> IEventStore<VacuumTypeEvent>
+
+        match! VacuumTypeBehaviour.handler store VacuumType.projection src cmd with
         | Accepted events ->
           do! store.Append { StreamSource = src; ExpectedVersion = None; Events = events }
           return CommandResult.Ok
@@ -65,6 +55,7 @@ module EventSourcedRoot =
         | Failed exn ->
           return CommandResult.Error exn
       }
+      |> Async.CatchCommandResult
 
   module private Order =
     let store = new SqlAggregateStore<Order, OrderEvent>(connectionString,Order.defaultProjection)

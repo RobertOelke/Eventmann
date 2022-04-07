@@ -1,51 +1,52 @@
-﻿namespace Eventmann.Server.MachineType
+﻿namespace Eventmann.Server.VacuumType
 
 open System
-open Eventmann.Shared.MachineType
+open Eventmann.Shared.VacuumType
 open Kairos.Server
 open Dapper
 open System.Data.SqlClient
 
-module MachineTypeOverview =
-  type private MachineTypeOverviewMsg =
+module VacuumTypeOverview =
+
+  type private VacuumTypeOverviewMsg =
   | Start
-  | NewEvent of EventData<MachineTypeEvent>
-  | Query of AsyncReplyChannel<MachineTypeOverview list>
+  | NewEvent of EventData<VacuumTypeEvent>
+  | Query of AsyncReplyChannel<VacuumTypeOverview list>
 
-  let machineTypeOverview (connectionString : string) (bus : IEventBus) =
+  let vacuumTypeOverview (connectionString : string) (bus : IEventBus) =
 
-    let handleEvent (event : EventData<MachineTypeEvent>) =
+    let handleEvent (event : EventData<VacuumTypeEvent>) =
       match event.Event with
       | Created args ->
         task {
           use connection = new SqlConnection(connectionString)
-          let insert = "INSERT INTO [MachineTypeOverview] (Id, MainType, SubType, Examples, Colour) VALUES (@Id, @MainType, @SubType, @Examples, @Colour)"
-          let! _ = connection.ExecuteAsync(insert, {| Id = event.Source; MainType = args.MainType; SubType = args.SubType; Examples = ""; Colour = "black" |})
+          let insert = "INSERT INTO [VacuumTypeOverview] (Id, Category, Name, Descriptions, Colour) VALUES (@Id, @Category, @Name, @Descriptions, @Colour)"
+          let! _ = connection.ExecuteAsync(insert, {| Id = event.Source; Category = args.Category; Name = args.Name; Descriptions = ""; Colour = "black" |})
           return ()
         } |> Some
 
-      | ExampleAdded args ->
+      | DescriptionAdded args ->
         task {
           use connection = new SqlConnection(connectionString)
-          let! example = connection.QueryFirstAsync<string>("SELECT Examples FROM [MachineTypeOverview] WHERE Id = @Id", {| Id = event.Source |})
+          let! example = connection.QueryFirstAsync<string>("SELECT Descriptions FROM [VacuumTypeOverview] WHERE Id = @Id", {| Id = event.Source |})
 
           let! _ = connection.ExecuteAsync(
-            "UPDATE [MachineTypeOverview] SET Examples = @Examples WHERE Id = @Id",
-            {| Id = event.Source; Examples = if String.IsNullOrWhiteSpace(example) then args.Example else $"{example}, {args.Example}" |})
+            "UPDATE [VacuumTypeOverview] SET Descriptions = @Descriptions WHERE Id = @Id",
+            {| Id = event.Source; Descriptions = if String.IsNullOrWhiteSpace(example) then args.Description else $"{example}, {args.Description}" |})
           return ()
         } |> Some
         
-      | ExampleRemoved args ->
+      | DescriptionRemoved args ->
         task {
           use connection = new SqlConnection(connectionString)
-          let! example = connection.QueryFirstAsync<string>("SELECT Examples FROM [MachineTypeOverview] WHERE Id = @Id", {| Id = event.Source |})
+          let! example = connection.QueryFirstAsync<string>("SELECT Examples FROM [VacuumTypeOverview] WHERE Id = @Id", {| Id = event.Source |})
 
           let examples =
             example.Split(", ")
-            |> Seq.filter((<>) args.Example)
+            |> Seq.filter((<>) args.Description)
 
           let! _ = connection.ExecuteAsync(
-            "UPDATE [MachineTypeOverview] SET Examples = @Examples WHERE Id = @Id",
+            "UPDATE [VacuumTypeOverview] SET Examples = @Examples WHERE Id = @Id",
             {| Id = event.Source; Examples = String.Join(", ", examples) |})
           return ()
         } |> Some
@@ -54,7 +55,7 @@ module MachineTypeOverview =
         task {
           use connection = new SqlConnection(connectionString)
           let! _ = connection.ExecuteAsync(
-            "UPDATE [MachineTypeOverview] SET Colour = @Colour WHERE Id = @Id",
+            "UPDATE [VacuumTypeOverview] SET Colour = @Colour WHERE Id = @Id",
             {| Id = event.Source; Colour = args.Colour |})
           return ()
         } |> Some
@@ -63,7 +64,7 @@ module MachineTypeOverview =
         task {
           use connection = new SqlConnection(connectionString)
           let! _ = connection.ExecuteAsync(
-            "DELETE FROM [MachineTypeOverview] WHERE Id = @Id",
+            "DELETE FROM [VacuumTypeOverview] WHERE Id = @Id",
             {| Id = event.Source |})
           return ()
         } |> Some
@@ -83,11 +84,11 @@ module MachineTypeOverview =
         task {
           use connection = new SqlConnection(connectionString)
           let createTable = $"
-            CREATE TABLE [dbo].[MachineTypeOverview] (
+            CREATE TABLE [dbo].[VacuumTypeOverview] (
 	          [Id] [uniqueidentifier] PRIMARY KEY,
-              [MainType] [varchar](100) NOT NULL,
-              [SubType] [varchar](100) NOT NULL,
-              [Examples] [varchar](500) NOT NULL,
+              [Category] [varchar](100) NOT NULL,
+              [Name] [varchar](100) NOT NULL,
+              [Descriptions] [varchar](500) NOT NULL,
               [Colour] [varchar](100) NOT NULL
             )"
 
@@ -105,9 +106,9 @@ module MachineTypeOverview =
       | Query reply ->
         task {
           use connection = new SqlConnection(connectionString)
-          let queryAll = "SELECT * FROM [MachineTypeOverview] ORDER BY MainType, SubType"
+          let queryAll = "SELECT * FROM [VacuumTypeOverview] ORDER BY Category, Name"
 
-          let! overView = connection.QueryAsync<MachineTypeOverview>(queryAll)
+          let! overView = connection.QueryAsync<VacuumTypeOverview>(queryAll)
           do reply.Reply(overView |> List.ofSeq)
           return ()
         } |> Async.AwaitTask

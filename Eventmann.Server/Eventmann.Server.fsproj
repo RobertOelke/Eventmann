@@ -5,8 +5,10 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="MachineType\Aggregate.fs" />
-    <Compile Include="MachineType\MachineTypeOverview.fs" />
+    <Compile Include="VacuumType\Events.fs" />
+    <Compile Include="VacuumType\Projections.fs" />
+    <Compile Include="VacuumType\ReadModels.fs" />
+    <Compile Include="VacuumType\Behaviour.fs" />
     <Compile Include="Order\Aggregate.fs" />
     <Compile Include="EventSourcedRoot.fs" />
     <Compile Include="Apis.fs" />

@@ -17,7 +17,7 @@ module AppRouter =
       prop.children [
         match url with
         | [] -> Html.text "Home"
-        | [ "machinetype" ] -> MachineTypePage.Render()
+        | [ "vacuum-type" ] -> VacuumTypePage.Render()
         | [ "add-order" ] -> AddOrderPage.Render()
         | [ "new-orders" ] -> NewOrdersPage.Render()
         | [ "sketch" ] -> SketchPage.Render()
