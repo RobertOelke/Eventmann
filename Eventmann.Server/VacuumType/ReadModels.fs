@@ -20,52 +20,71 @@ module VacuumTypeOverview =
       | Created args ->
         task {
           use connection = new SqlConnection(connectionString)
-          let insert = "INSERT INTO [VacuumTypeOverview] (Id, Category, Name, Descriptions, Colour) VALUES (@Id, @Category, @Name, @Descriptions, @Colour)"
-          let! _ = connection.ExecuteAsync(insert, {| Id = event.Source; Category = args.Category; Name = args.Name; Descriptions = ""; Colour = "black" |})
+
+          let! _ =
+            connection.ExecuteAsync(
+              "INSERT INTO [VacuumTypeOverview] (Id, Category, Name, Descriptions, Colour) VALUES (@Id, @Category, @Name, @Descriptions, @Colour)",
+              {| Id = event.Source; Category = args.Category; Name = args.Name; Descriptions = ""; Colour = "black" |})
+
           return ()
         } |> Some
 
       | DescriptionAdded args ->
         task {
           use connection = new SqlConnection(connectionString)
-          let! example = connection.QueryFirstAsync<string>("SELECT Descriptions FROM [VacuumTypeOverview] WHERE Id = @Id", {| Id = event.Source |})
 
-          let! _ = connection.ExecuteAsync(
-            "UPDATE [VacuumTypeOverview] SET Descriptions = @Descriptions WHERE Id = @Id",
-            {| Id = event.Source; Descriptions = if String.IsNullOrWhiteSpace(example) then args.Description else $"{example}, {args.Description}" |})
+          let! example =
+            connection.QueryFirstAsync<string>(
+              "SELECT Descriptions FROM [VacuumTypeOverview] WHERE Id = @Id",
+              {| Id = event.Source |})
+
+          let! _ =
+            connection.ExecuteAsync(
+              "UPDATE [VacuumTypeOverview] SET Descriptions = @Descriptions WHERE Id = @Id",
+              {| Id = event.Source; Descriptions = if String.IsNullOrWhiteSpace(example) then args.Description else $"{example}, {args.Description}" |})
+
           return ()
         } |> Some
         
       | DescriptionRemoved args ->
         task {
           use connection = new SqlConnection(connectionString)
-          let! example = connection.QueryFirstAsync<string>("SELECT Examples FROM [VacuumTypeOverview] WHERE Id = @Id", {| Id = event.Source |})
+          let! example =
+            connection.QueryFirstAsync<string>(
+              "SELECT Examples FROM [VacuumTypeOverview] WHERE Id = @Id",
+              {| Id = event.Source |})
 
           let examples =
             example.Split(", ")
             |> Seq.filter((<>) args.Description)
 
-          let! _ = connection.ExecuteAsync(
-            "UPDATE [VacuumTypeOverview] SET Examples = @Examples WHERE Id = @Id",
-            {| Id = event.Source; Examples = String.Join(", ", examples) |})
+          let! _ =
+            connection.ExecuteAsync(
+              "UPDATE [VacuumTypeOverview] SET Examples = @Examples WHERE Id = @Id",
+              {| Id = event.Source; Examples = String.Join(", ", examples) |})
+
           return ()
         } |> Some
 
       | ColourChanged args ->
         task {
           use connection = new SqlConnection(connectionString)
+
           let! _ = connection.ExecuteAsync(
             "UPDATE [VacuumTypeOverview] SET Colour = @Colour WHERE Id = @Id",
             {| Id = event.Source; Colour = args.Colour |})
+
           return ()
         } |> Some
 
       | Deleted ->
         task {
           use connection = new SqlConnection(connectionString)
+
           let! _ = connection.ExecuteAsync(
             "DELETE FROM [VacuumTypeOverview] WHERE Id = @Id",
             {| Id = event.Source |})
+
           return ()
         } |> Some
 

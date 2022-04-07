@@ -9,7 +9,9 @@
     <Compile Include="VacuumType\Projections.fs" />
     <Compile Include="VacuumType\ReadModels.fs" />
     <Compile Include="VacuumType\Behaviour.fs" />
-    <Compile Include="Order\Aggregate.fs" />
+    <Compile Include="Order\Events.fs" />
+    <Compile Include="Order\Projections.fs" />
+    <Compile Include="Order\Behaviour.fs" />
     <Compile Include="EventSourcedRoot.fs" />
     <Compile Include="Apis.fs" />
     <Compile Include="Program.fs" />

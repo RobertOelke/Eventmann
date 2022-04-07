@@ -14,23 +14,25 @@ module EventSourcedRoot =
   let [<Literal>] connectionString = "Server=.\SQLExpress;Database=Eventmann;Trusted_Connection=Yes;"
 
   module private MachineType =
-    let store = new SqlAggregateStore<VacuumType, VacuumTypeEvent>(connectionString, VacuumType.projection)
+    let store = new SqlEventStore<VacuumTypeEvent>(connectionString)
       
     let overView = VacuumTypeOverview.vacuumTypeOverview connectionString
 
     let details _ uid =
-      let store = store :> IAggregateStore<VacuumType, VacuumTypeEvent>
+      let store = store :> IEventStore<VacuumTypeEvent>
       async {
-        let! aggregate = store.GetAggregate uid
+        let! eventStream = store.GetStream uid
+        
         return
-          aggregate
-          |> Option.filter (fun a -> not a.State.IsDeleted)
+          eventStream
+          |> Projection.project VacuumType.projection
           |> Option.map(fun a -> a.State)
+          |> Option.filter (fun a -> not a.IsDeleted)
       }
 
     let history _ uid : Async<VacuumTypeHistory list> =
       async {
-        let store = store :> IAggregateStore<VacuumType, VacuumTypeEvent>
+        let store = store :> IEventStore<VacuumTypeEvent>
         let! events = store.GetStream uid
 
         return
@@ -54,14 +56,15 @@ module EventSourcedRoot =
       |> Async.CatchCommandResult
 
   module private Order =
-    let store = new SqlAggregateStore<Order, OrderEvent>(connectionString,Order.defaultProjection)
+    let store = new SqlEventStore<OrderEvent>(connectionString)
 
     let commandHandler (src : EventSource) (cmd : OrderCommand) =
       async {
-        let store = store :> IAggregateStore<Order, OrderEvent>
-        let! aggregate = store.GetAggregate src
-        let newEvents = OrderCommand.commandHandler (aggregate |> Option.map (fun a -> a.State)) cmd
+        let store = store :> IEventStore<OrderEvent>
+
+        let! newEvents = OrderBehaviour.handler store Order.projection src cmd
         do! store.Append { StreamSource = src; ExpectedVersion = None; Events = newEvents }
+
         return CommandResult.Ok
       }
 
