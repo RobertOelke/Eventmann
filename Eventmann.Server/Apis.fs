@@ -21,19 +21,6 @@ module Apis =
         | _ -> return []
       }
 
-    let create main sub =
-      async {
-        let! creationResult = cmdHandler.Handle (Guid.NewGuid(), VacuumTypeCommand.Create (main, sub))
-        match creationResult with
-        | CommandResult.Ok -> ()
-        | CommandResult.Rejected ->
-          printfn "Rejected"
-        | CommandResult.NoHandler t -> 
-          printfn "NoHandler: %s" t.Name
-        | CommandResult.Error exn ->
-          printfn "Error: %s" exn.Message
-      }
-
     let getDetails uid : Async<VacuumType option> =
       async {
         match! queryHandler.TryHandle uid with
@@ -43,16 +30,12 @@ module Apis =
 
     let update (uid : EventSource) (cmd : VacuumTypeCommand) : Async<unit> =
       async {
-        let! creationResult = cmdHandler.Handle (uid, cmd)
-        match creationResult with
+        match! cmdHandler.Handle (uid, cmd) with
         | CommandResult.Ok -> ()
-        | CommandResult.Rejected ->
-          printfn "Rejected"
-        | CommandResult.NoHandler t -> 
-          printfn "NoHandler: %s" t.Name
-        | CommandResult.Error exn ->
-          printfn "Error: %s" exn.Message
+        | CommandResult.Error exn -> printfn "Error: %s" exn.Message
       }
+
+    let create = update (Guid.NewGuid())
 
     let getLog (uid : EventSource) : Async<VacuumTypeHistory list> =
       async {
@@ -65,7 +48,7 @@ module Apis =
       GetAll = getAll
       GetDetails = getDetails
       Update = update
-      Create = fun args -> create args.MainType args.SubType
+      Create = fun args -> VacuumTypeCommand.Create (args.MainType, args.SubType) |> create
       GetLog = getLog
     }
 
@@ -76,18 +59,14 @@ module Apis =
 
   let order (cmdHandler : ICommandHandler) (queryHandler : IQueryHandler) =
   
-    let create (cmd : OrderCommand) =
+    let update (uid : EventSource) (cmd : OrderCommand) =
       async {
-        let! creationResult = cmdHandler.Handle (Guid.NewGuid(), cmd)
-        match creationResult with
+        match! cmdHandler.Handle (uid, cmd) with
         | CommandResult.Ok -> ()
-        | CommandResult.Rejected ->
-          printfn "Rejected"
-        | CommandResult.NoHandler t -> 
-          printfn "NoHandler: %s" t.Name
-        | CommandResult.Error exn ->
-          printfn "Error: %s" exn.Message
+        | CommandResult.Error exn -> printfn "Error: %s" exn.Message
       }
+
+    let create = update (Guid.NewGuid())
   
     let api : OrderApi = {
       PlaceOrder = OrderCommand.PlaceOrder >> create

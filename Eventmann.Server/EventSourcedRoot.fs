@@ -46,14 +46,10 @@ module EventSourcedRoot =
       async {
         let store = store :> IEventStore<VacuumTypeEvent>
 
-        match! VacuumTypeBehaviour.handler store VacuumType.projection src cmd with
-        | Accepted events ->
-          do! store.Append { StreamSource = src; ExpectedVersion = None; Events = events }
-          return CommandResult.Ok
-        | Rejected _ ->
-          return CommandResult.Rejected
-        | Failed exn ->
-          return CommandResult.Error exn
+        let! newEvents = VacuumTypeBehaviour.handler store VacuumType.projection src cmd
+        do! store.Append { StreamSource = src; ExpectedVersion = None; Events = newEvents }
+
+        return CommandResult.Ok
       }
       |> Async.CatchCommandResult
 
@@ -64,14 +60,9 @@ module EventSourcedRoot =
       async {
         let store = store :> IAggregateStore<Order, OrderEvent>
         let! aggregate = store.GetAggregate src
-        match OrderCommand.commandHandler (aggregate |> Option.map (fun a -> a.State)) cmd with
-        | Accepted events ->
-          do! store.Append { StreamSource = src; ExpectedVersion = None; Events = events }
-          return CommandResult.Ok
-        | Rejected _ ->
-          return CommandResult.Rejected
-        | Failed exn ->
-          return CommandResult.Error exn
+        let newEvents = OrderCommand.commandHandler (aggregate |> Option.map (fun a -> a.State)) cmd
+        do! store.Append { StreamSource = src; ExpectedVersion = None; Events = newEvents }
+        return CommandResult.Ok
       }
 
   let cmd, query =

@@ -43,7 +43,7 @@ module OrderCommand =
     | None ->
       match cmd with
       | PlaceOrder order ->
-        Accepted [
+        [
           OrderPlaced {|
             SerialNumber = order.SerialNumber
             Customer = order.Customer
@@ -52,8 +52,8 @@ module OrderCommand =
             DeliveryDate = order.DeliveryDate
           |}
         ]
-      // | _ -> Rejected "Order does not exists"
+      // | _ -> []
 
     | Some state ->
       match cmd with
-      | PlaceOrder _ -> Rejected "Order already exists"
+      | PlaceOrder _ -> []

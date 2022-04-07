@@ -18,68 +18,67 @@ module VacuumTypeBehaviour =
         | None ->
           match cmd with
           | Create (category, name) ->
-            Accepted [ Created {| Category = category; Name = name |} ]
-          | _ ->
-            Rejected "Vacuum type already exists"
+            [ Created {| Category = category; Name = name |} ]
+          | _ -> []
         | Some state ->
           let state = state.State
           match cmd with
           | Create (category, name) ->
-            Rejected "Machine type already exists"
+            []
         
           | AddDescription description ->
-            if state.Descriptions |> List.contains description || String.IsNullOrWhiteSpace description then
-              Rejected "Dublicate or empty example"
-            else
-              Accepted [ DescriptionAdded {| Description = description |} ]
+            if state.Descriptions |> List.contains description || String.IsNullOrWhiteSpace description
+            then []
+            else [ DescriptionAdded {| Description = description |} ]
         
           | RemoveDescription description ->
-            if state.Descriptions |> List.contains description then
-              Accepted [ DescriptionRemoved {| Description = description |} ]
-            else
-              Rejected "Example not found"
+            if state.Descriptions |> List.contains description
+            then [ DescriptionRemoved {| Description = description |} ]
+            else []
         
           | ChangeColour colour ->
-            if state.Colour <> colour then
-              Accepted [ ColourChanged {| Colour = colour |}  ]
-            else
-              Rejected "Colour not changed"
+            if state.Colour <> colour
+            then [ ColourChanged {| Colour = colour |}  ]
+            else []
         
           | ChangeSketchDuration duration ->
             if duration < 0 then
-              Rejected "Duration can not be negativs"
+              []
             else
               match (duration - state.Sketch) with
-              | i when i > 0 -> Accepted [ SketchExtended {| Days = i |} ]
-              | i when i < 0 -> Accepted [ SketchShortened {| Days = -i |} ]
-              | _ -> Rejected "Sketch duration not changed"
+              | i when i > 0 -> [ SketchExtended {| Days = i |} ]
+              | i when i < 0 -> [ SketchShortened {| Days = -i |} ]
+              | _ -> []
         
           | ChangeConstructionDuration duration -> 
-            if duration < 0 then
-              Rejected "Duration can not be negativs"
+            if duration < 0
+            then []
             else
               match (duration - state.Construction) with
-              | i when i > 0 -> Accepted [ ConstructionExtended {| Days = i |} ]
-              | i when i < 0 -> Accepted [ ConstructionShortened {| Days = -i |} ]
-              | _ -> Rejected "Construction duration not changed"
+              | i when i > 0 -> [ ConstructionExtended {| Days = i |} ]
+              | i when i < 0 -> [ ConstructionShortened {| Days = -i |} ]
+              | _ -> []
         
           | ChangeMontageDuration duration -> 
-            if duration < 0 then
-              Rejected "Duration can not be negativs"
+            if duration < 0
+            then []
             else
               match (duration - state.Montage) with
-              | i when i > 0 -> Accepted [ MontageExtended {| Days = i |} ]
-              | i when i < 0 -> Accepted [ MontageShortened {| Days = -i |} ]
-              | _ -> Rejected "Montage duration not changed"
+              | i when i > 0 -> [ MontageExtended {| Days = i |} ]
+              | i when i < 0 -> [ MontageShortened {| Days = -i |} ]
+              | _ -> []
         
           | ChangeShippingDuration duration -> 
-            if duration < 0 then
-              Rejected "Duration can not be negativs"
+            if duration < 0
+            then []
             else
               match (duration - state.Shipping) with
-              | i when i > 0 -> Accepted [ ShippingExtended {| Days = i |} ]
-              | i when i < 0 -> Accepted [ ShippingShortened {| Days = -i |} ]
-              | _ -> Rejected "Construction duration not changed"
+              | i when i > 0 -> [ ShippingExtended {| Days = i |} ]
+              | i when i < 0 -> [ ShippingShortened {| Days = -i |} ]
+              | _ -> []
         
-          | Delete -> Accepted [ Deleted ]
+          | Delete ->
+            if state.IsDeleted
+            then []
+            else [ Deleted ]
     }
