@@ -14,4 +14,5 @@ type VacuumTypeApi = {
 
 type OrderApi = {
   PlaceOrder : NewOrder -> Async<unit>
+  GetOrders : OrderPhase -> Async<Order list>
 }

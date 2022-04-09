@@ -13,7 +13,7 @@ module VacuumTypeOverview =
   | NewEvent of EventData<VacuumTypeEvent>
   | Query of AsyncReplyChannel<VacuumTypeOverview list>
 
-  let vacuumTypeOverview (connectionString : string) (bus : IEventBus) =
+  let readModel (connectionString : string) (bus : IEventBus) =
 
     let handleEvent (event : EventData<VacuumTypeEvent>) =
       match event.Event with

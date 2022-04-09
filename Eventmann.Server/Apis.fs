@@ -66,10 +66,23 @@ module Apis =
         | CommandResult.Error exn -> printfn "Error: %s" exn.Message
       }
 
+    let getOrders (phase : OrderPhase) : Async<Order list> =
+      async {
+        match! queryHandler.TryHandle<OrderPhase, Map<EventSource, Order>> phase with
+        | QueryResult.Ok orders ->
+          return
+            orders
+            |> Map.values
+            |> List.ofSeq
+          
+        | _ -> return []
+      }
+
     let create = update (Guid.NewGuid())
   
     let api : OrderApi = {
       PlaceOrder = OrderCommand.PlaceOrder >> create
+      GetOrders = getOrders
     }
 
     Remoting.createApi ()

@@ -11,6 +11,7 @@
     <Compile Include="VacuumType\Behaviour.fs" />
     <Compile Include="Order\Events.fs" />
     <Compile Include="Order\Projections.fs" />
+    <Compile Include="Order\ReadModels.fs" />
     <Compile Include="Order\Behaviour.fs" />
     <Compile Include="EventSourcedRoot.fs" />
     <Compile Include="Apis.fs" />

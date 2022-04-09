@@ -2,6 +2,15 @@
 
 open System
 
+type OrderPhase =
+| NewOrder
+| Sketch
+| Construction
+| Montage
+| Shipping
+| Completed
+| All
+
 type NewOrder = {
   SerialNumber : string
   Customer : string
