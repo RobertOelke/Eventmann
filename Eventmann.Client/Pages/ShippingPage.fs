@@ -8,10 +8,11 @@ open Feliz.Bulma
 open Eventmann.Client
 open Eventmann.Shared
 open Eventmann.Shared.MachineType
+open Eventmann.Shared.Order
 
 module ShippingPage =
 
   [<ReactComponent>]
   let Render() =
-    Html.text "ToDo"
+    GenericOrderPage.Render OrderPhase.Shipping
 

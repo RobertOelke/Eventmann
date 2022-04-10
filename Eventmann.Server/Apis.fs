@@ -87,12 +87,20 @@ module Apis =
       }
 
     let create cmd = update (Guid.NewGuid()) cmd
-  
+
+    let getLog (uid : EventSource) : Async<OrderHistory list> =
+      async {
+        match! queryHandler.TryHandle uid with
+        | QueryResult.Ok ok -> return ok
+        | _ -> return []
+      }
+
     let api : OrderApi = {
       PlaceOrder = OrderCommand.PlaceOrder >> create
       GetOrders = getOrders
       GetBySrc = getBySrc
       Update = update
+      GetLog = getLog
     }
 
     Remoting.createApi ()

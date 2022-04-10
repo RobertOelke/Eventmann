@@ -7,11 +7,12 @@ open Feliz.UseElmish
 open Feliz.Bulma
 open Eventmann.Client
 open Eventmann.Shared
+open Eventmann.Shared.TechnicalData
 open Eventmann.Shared.MachineType
+open Eventmann.Shared.Order
 
 module SketchPage =
 
   [<ReactComponent>]
   let Render() =
-    Html.text "ToDo"
-
+    GenericOrderPage.Render OrderPhase.Sketch

@@ -7,10 +7,11 @@ open Feliz.UseElmish
 open Feliz.Bulma
 open Eventmann.Client
 open Eventmann.Shared
+open Eventmann.Shared.Order
 
 module ConstructionPage =
 
   [<ReactComponent>]
   let Render() =
-    Html.text "ToDo"
+    GenericOrderPage.Render OrderPhase.Construction
 

@@ -153,46 +153,42 @@ module NewOrdersPage =
     let state, dispatch = React.useElmish(init, update)
 
     React.fragment [
-      match state.Orders with
-      | [] ->
-        React.fragment []
-      | lst ->
-        Bulma.table [
-          table.isFullWidth
-          prop.children [
-            Html.thead [
-              Html.tr [
-                Html.th "Serial number"
-                Html.th "Customer"
-                Html.th "Model"
-                Html.th ""
-              ]
+      Bulma.table [
+        table.isFullWidth
+        prop.children [
+          Html.thead [
+            Html.tr [
+              Html.th "Serial number"
+              Html.th "Customer"
+              Html.th "Model"
+              Html.th ""
             ]
-            Html.tableBody [
-              for (src, order) in lst do
-                Html.tr [
+          ]
+          Html.tableBody [
+            for (src, order) in state.Orders do
+              Html.tr [
 
-                  prop.children [
-                    Html.td [
-                      prop.text order.SerialNumber
-                      prop.onClick(fun _ ->
-                        (src, order) |> Some |> SelectOrder |> dispatch
-                      )
-                    ]
-                    Html.td order.Customer
-                    Html.td order.ModelName
-                    Html.td [
-                      Bulma.button.button [
-                        color.isPrimary
-                        prop.text "Finish Planning"
-                        prop.onClick (fun _ -> src |> FinishPlanning |> dispatch)
-                      ]
+                prop.children [
+                  Html.td [
+                    prop.text order.SerialNumber
+                    prop.onClick(fun _ ->
+                      (src, order) |> Some |> SelectOrder |> dispatch
+                    )
+                  ]
+                  Html.td order.Customer
+                  Html.td order.ModelName
+                  Html.td [
+                    Bulma.button.button [
+                      color.isPrimary
+                      prop.text "Finish Planning"
+                      prop.onClick (fun _ -> src |> FinishPlanning |> dispatch)
                     ]
                   ]
                 ]
-            ]
+              ]
           ]
         ]
+      ]
       
       match state.SelectedOrder with
       | Some selected ->

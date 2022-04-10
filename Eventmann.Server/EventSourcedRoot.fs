@@ -46,7 +46,7 @@ module EventSourcedRoot =
           return
             events
             |> List.map (fun e -> {
-              Date = e.RecordedAtUtc
+              MachineTypeHistory.Date = e.RecordedAtUtc
               Action = sprintf "%A" e.Event
             })
             |> List.sortBy (fun h -> h.Date)
@@ -79,6 +79,22 @@ module EventSourcedRoot =
         async {
           let! model = inMemoryOrderReadModel.GetBySrc src
           return model |> Option.map (fun a -> a.State)
+        })
+
+    let getLog : QueryHander<EventSource, OrderHistory list> =
+      QueryHander (fun uid ->
+        let store = store :> IEventStore<OrderEvent>
+
+        async {
+          let! events = store.GetStream uid
+
+          return
+            events
+            |> List.map (fun e -> {
+              OrderHistory.Date = e.RecordedAtUtc
+              Action = sprintf "%A" e.Event
+            })
+            |> List.sortBy (fun h -> h.Date)
         })
 
     let commandHandler (getMachineType : QueryHander<EventSource, MachineType option>) =
@@ -137,6 +153,7 @@ module EventSourcedRoot =
     // Orders
     |> EventSourced.addQueryHandler Order.getForPhase
     |> EventSourced.addQueryHandler Order.getBySrc
+    |> EventSourced.addQueryHandler Order.getLog
     |> EventSourced.addCommandHandler (Order.commandHandler MachineType.details)
     |> EventSourced.addProducer Order.store
     |> EventSourced.addConsumer Order.inMemoryOrderReadModel

@@ -18,6 +18,7 @@ type OrderApi = {
   GetOrders : OrderPhase -> Async<(Guid * Order) list>
   GetBySrc : Guid -> Async<Order>
   Update : Guid -> OrderCommand -> Async<unit>
+  GetLog : Guid -> Async<OrderHistory list>
 }
 
 type TechnicalDataApi = {

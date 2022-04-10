@@ -49,7 +49,7 @@ module Order =
           DeliveryDate = args.DeliveryDate
         }
 
-      | PeriodsInitialized args ->
+      | ScheduleInitialized args ->
         state |> fillPhases args.Sketch args.Construction args.Shipping
 
       | UpdatedTechnicalData args ->
@@ -57,5 +57,26 @@ module Order =
 
       | PlanningFinished ->
         { state with CurrentPhase = Sketch }
+      
+      | SketchStartChanged args ->
+        { state with SketchPeriod = { state.SketchPeriod with Start = args.Date } }
+      | SketchEndChanged args ->
+        { state with SketchPeriod = { state.SketchPeriod with End = args.Date } }
+      | SketchFinished ->
+        { state with CurrentPhase = Construction }
+      
+      | ConstructionStartChanged args ->
+        { state with SketchPeriod = { state.ConstructionPeriod with Start = args.Date } }
+      | ConstructionEndChanged args ->
+        { state with SketchPeriod = { state.ConstructionPeriod with End = args.Date } }
+      | ConstructionFinished ->
+        { state with CurrentPhase = Shipping }
+
+      | ShippingStartChanged args ->
+        { state with SketchPeriod = { state.ShippingPeriod with Start = args.Date } }
+      | ShippingEndChanged args ->
+        { state with SketchPeriod = { state.ShippingPeriod with End = args.Date } }
+      | ShippingFinished ->
+        { state with CurrentPhase = Completed }
 
     { Zero = zero; Update = update }

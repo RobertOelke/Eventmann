@@ -30,3 +30,8 @@ type Order = {
   AdditionalData : Map<string, string>
   Remarks : string list
 }
+
+type OrderHistory = {
+  Date : DateTime
+  Action : string
+}

@@ -10,6 +10,7 @@
 		<Compile Include="Pages\TechnicalDataPage.fs" />
 		<Compile Include="Pages\AddOrderPage.fs" />
 		<Compile Include="Pages\NewOrdersPage.fs" />
+		<Compile Include="Pages\GenericOrderPage.fs" />
 		<Compile Include="Pages\SketchPage.fs" />
 		<Compile Include="Pages\ConstructionPage.fs" />
 		<Compile Include="Pages\ShippingPage.fs" />
