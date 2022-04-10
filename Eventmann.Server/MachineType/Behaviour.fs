@@ -1,15 +1,15 @@
-﻿namespace Eventmann.Server.VacuumType
+﻿namespace Eventmann.Server.MachineType
 
 open System
-open Eventmann.Shared.VacuumType
+open Eventmann.Shared.MachineType
 open Kairos.Server
 
-module VacuumTypeBehaviour =
+module MachineTypeBehaviour =
   let handler
-    (store : IEventStore<VacuumTypeEvent>)
-    (projection : Projection<VacuumType, VacuumTypeEvent>)
+    (store : IEventStore<MachineTypeEvent>)
+    (projection : Projection<MachineType, MachineTypeEvent>)
     (src : EventSource)
-    (cmd : VacuumTypeCommand) =
+    (cmd : MachineTypeCommand) =
     async {
       let! events = store.GetStream src
 
@@ -57,15 +57,6 @@ module VacuumTypeBehaviour =
               match (duration - state.Construction) with
               | i when i > 0 -> [ ConstructionExtended {| Days = i |} ]
               | i when i < 0 -> [ ConstructionShortened {| Days = -i |} ]
-              | _ -> []
-        
-          | ChangeMontageDuration duration -> 
-            if duration < 0
-            then []
-            else
-              match (duration - state.Montage) with
-              | i when i > 0 -> [ MontageExtended {| Days = i |} ]
-              | i when i < 0 -> [ MontageShortened {| Days = -i |} ]
               | _ -> []
         
           | ChangeShippingDuration duration -> 

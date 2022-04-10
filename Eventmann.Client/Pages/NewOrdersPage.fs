@@ -13,7 +13,7 @@ module NewOrdersPage =
   
   let loadOrders setter () =
     async {
-      let! orders = Apis.order.GetOrders OrderPhase.NewOrder
+      let! orders = Apis.order.GetOrders OrderPhase.Pending
       orders |> Some |> setter
     } |> Async.StartImmediate
 

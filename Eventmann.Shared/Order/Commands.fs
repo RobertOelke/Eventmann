@@ -2,22 +2,23 @@
 
 open System
 
-type OrderPhase =
-| NewOrder
-| Sketch
-| Construction
-| Montage
-| Shipping
-| Completed
-| All
 
 type NewOrder = {
   SerialNumber : string
   Customer : string
   ModelName : string
-  VacuumType : Guid
-  DeliveryDate : DateTime
+  MachineType : Guid
+  DeliveryDate : DateOnly
 }
 
 type OrderCommand =
 | PlaceOrder of NewOrder
+// | FinishPlanning
+// | StartSketch
+// | FinishSketch
+// 
+// | StartConstruction
+// | FinishConstruction
+// 
+// | StartShipping
+// | FinishShipping

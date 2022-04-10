@@ -26,14 +26,15 @@ module AppMenu =
               prop.onClick (fun _ -> Router.Router.navigate url)
             ]
           Bulma.navbarStart.div [
-            link "Vacuum Types" [| "vacuum-type" |]
+            link "Machine Types" [| "machine-type" |]
             link "Add Order" [| "add-order" |]
             link "New Orders" [| "new-orders" |]
             link "Sketch" [| "sketch" |]
             link "Construction" [| "construction" |]
-            link "Montage" [| "montage" |]
             link "Shipping" [| "shipping" |]
             link "Completed Orders" [| "completed-orders" |]
+            link "Technical Data" [| "technical-data" |]
+
           ]
         ]
       ]

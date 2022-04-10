@@ -7,9 +7,9 @@ open Feliz.UseElmish
 open Feliz.Bulma
 open Eventmann.Client
 open Eventmann.Shared
-open Eventmann.Shared.VacuumType
+open Eventmann.Shared.MachineType
 
-module VacuumTypeCreate =
+module MachineTypeCreate =
 
   [<ReactComponent>]
   let Render save cancel =
@@ -49,11 +49,11 @@ module VacuumTypeCreate =
       ]
     ]
 
-module VacuumTypeDetails =
+module MachineTypeDetails =
 
   type StateDif = {
-    Original : VacuumType
-    Current : VacuumType
+    Original : MachineType
+    Current : MachineType
   }
 
   type State = {
@@ -65,15 +65,14 @@ module VacuumTypeDetails =
 
   type Msg =
   | Load
-  | Loaded of VacuumType option
+  | Loaded of MachineType option
   | NewDescriptionChanged of string
   | ChangeColour of string
   | ChangeSketch of int
   | ChangeConstruction of int
-  | ChangeMontage of int
   | ChangeShipping of int
   | UpdateDuration
-  | Update of VacuumTypeCommand
+  | Update of MachineTypeCommand
 
   let init uid () = 
     let empty = {
@@ -92,7 +91,7 @@ module VacuumTypeDetails =
 
     match msg with
     | Load ->
-      let loadData = Cmd.OfAsync.perform Apis.vacuumType.GetDetails state.Uid Loaded
+      let loadData = Cmd.OfAsync.perform Apis.machineType.GetDetails state.Uid Loaded
       { state with IsLoading = true }, loadData
     | Loaded (Some data) ->
       { state with IsLoading = false; State = Some { Original = data; Current = data } }, Cmd.none
@@ -107,8 +106,6 @@ module VacuumTypeDetails =
       updateCurrent (fun s -> { s with Sketch = sketch }), Cmd.none
     | ChangeConstruction construction ->
       updateCurrent (fun s -> { s with Construction = construction }), Cmd.none
-    | ChangeMontage montage ->
-      updateCurrent (fun s -> { s with Montage = montage }), Cmd.none
     | ChangeShipping shipping ->
       updateCurrent (fun s -> { s with Shipping = shipping }), Cmd.none
 
@@ -118,20 +115,18 @@ module VacuumTypeDetails =
           match state.State with
           | Some { Original = o; Current = c } ->
             if (o.Sketch <> c.Sketch) then
-              do! Apis.vacuumType.Update state.Uid (ChangeSketchDuration c.Sketch)
+              do! Apis.machineType.Update state.Uid (ChangeSketchDuration c.Sketch)
 
             if (o.Construction <> c.Construction) then
-              do! Apis.vacuumType.Update state.Uid (ChangeConstructionDuration c.Construction)
+              do! Apis.machineType.Update state.Uid (ChangeConstructionDuration c.Construction)
 
-            if (o.Montage <> c.Montage) then
-              do! Apis.vacuumType.Update state.Uid (ChangeMontageDuration c.Montage)
 
             if (o.Shipping <> c.Shipping) then
-              do! Apis.vacuumType.Update state.Uid (ChangeShippingDuration c.Shipping)
+              do! Apis.machineType.Update state.Uid (ChangeShippingDuration c.Shipping)
 
           | None -> ()
 
-          return! Apis.vacuumType.GetDetails state.Uid
+          return! Apis.machineType.GetDetails state.Uid
         }
       
       { state with IsLoading = true }, Cmd.OfAsync.perform update () Loaded
@@ -139,8 +134,8 @@ module VacuumTypeDetails =
     | Update cmd ->
       let update () =
         async {
-          do! Apis.vacuumType.Update state.Uid cmd
-          return! Apis.vacuumType.GetDetails state.Uid
+          do! Apis.machineType.Update state.Uid cmd
+          return! Apis.machineType.GetDetails state.Uid
         }
       
       { state with IsLoading = true; NewDescription = "" }, Cmd.OfAsync.perform update () Loaded
@@ -229,7 +224,7 @@ module VacuumTypeDetails =
                     ]
                     prop.disabled (loading || current.Colour = original.Colour || current.Colour = "")
                     prop.text "Change"
-                    prop.onClick (fun _ -> current.Colour |> VacuumTypeCommand.ChangeColour |> Update |> dispatch)
+                    prop.onClick (fun _ -> current.Colour |> MachineTypeCommand.ChangeColour |> Update |> dispatch)
                   ]
                 ]
               ]
@@ -254,7 +249,6 @@ module VacuumTypeDetails =
 
             duration "Sketch" current.Sketch ChangeSketch
             duration "Construction" current.Construction ChangeConstruction
-            duration "Montage" current.Montage ChangeMontage
             duration "Shipping" current.Shipping ChangeShipping
             
             Bulma.field.div [
@@ -280,11 +274,11 @@ module VacuumTypeDetails =
       ]
     ]
 
-module VacuumTypeHistory =
+module MachineTypeHistory =
   
   let loadLog uid setter () =
     async {
-      let! logs = Apis.vacuumType.GetLog uid
+      let! logs = Apis.machineType.GetLog uid
       setter logs
       return ()
     } |> Async.StartImmediate
@@ -307,7 +301,7 @@ module VacuumTypeHistory =
       ]
     ]
 
-module VacuumTypePage =
+module MachineTypePage =
 
   type Popup =
   | Empty
@@ -317,7 +311,7 @@ module VacuumTypePage =
 
   type State = {
     IsLoading : bool
-    Data : VacuumTypeOverview list
+    Data : MachineTypeOverview list
     Popup : Popup
   }
 
@@ -329,7 +323,7 @@ module VacuumTypePage =
 
   type Msg =
   | Load
-  | Loaded of VacuumTypeOverview list
+  | Loaded of MachineTypeOverview list
   | ShowCreate
   | FinishCreate of {| Main : string; Sub : string |}
   | ClosePopup
@@ -340,7 +334,7 @@ module VacuumTypePage =
   let update msg state = 
     match msg with
     | Load ->
-      { state with IsLoading = true }, Cmd.OfAsync.perform Apis.vacuumType.GetAll () Loaded
+      { state with IsLoading = true }, Cmd.OfAsync.perform Apis.machineType.GetAll () Loaded
 
     | Loaded lst ->
       { state with IsLoading = false; Data = lst }, Cmd.none
@@ -351,8 +345,8 @@ module VacuumTypePage =
     | FinishCreate args ->
       let async () =
         async {
-          do! Apis.vacuumType.Create {| MainType = args.Main; SubType = args.Sub |}
-          return! Apis.vacuumType.GetAll()
+          do! Apis.machineType.Create {| MainType = args.Main; SubType = args.Sub |}
+          return! Apis.machineType.GetAll()
         }
 
       { state with IsLoading = true; Popup = Empty }, Cmd.OfAsync.perform async () Loaded
@@ -360,14 +354,14 @@ module VacuumTypePage =
     | Delete uid ->
       let async () =
         async {
-          do! Apis.vacuumType.Update uid VacuumTypeCommand.Delete
-          return! Apis.vacuumType.GetAll()
+          do! Apis.machineType.Update uid MachineTypeCommand.Delete
+          return! Apis.machineType.GetAll()
         }
 
       { state with IsLoading = true; Popup = Empty }, Cmd.OfAsync.perform async () Loaded
 
     | ClosePopup ->
-      { state with Popup = Empty }, Cmd.OfAsync.perform Apis.vacuumType.GetAll () Loaded
+      { state with Popup = Empty }, Cmd.OfAsync.perform Apis.machineType.GetAll () Loaded
 
     | StartEdit uid ->
       { state with Popup = Edit uid }, Cmd.none
@@ -400,15 +394,15 @@ module VacuumTypePage =
               match state.Popup with
               | Empty -> React.fragment []
               | Create -> 
-                VacuumTypeCreate.Render
+                MachineTypeCreate.Render
                   (fun (m, s) -> {| Main = m; Sub = s |} |> FinishCreate |> dispatch)  
                   (fun () -> ClosePopup |> dispatch)
               | Edit uid ->
-                VacuumTypeDetails.Render
+                MachineTypeDetails.Render
                   uid
                   (fun () -> ClosePopup |> dispatch)
               | History uid ->
-                VacuumTypeHistory.Render
+                MachineTypeHistory.Render
                   uid
                   (fun () -> ClosePopup |> dispatch)
             ]

@@ -5,10 +5,13 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="VacuumType\Events.fs" />
-    <Compile Include="VacuumType\Projections.fs" />
-    <Compile Include="VacuumType\ReadModels.fs" />
-    <Compile Include="VacuumType\Behaviour.fs" />
+    <Compile Include="TechnicalData\Events.fs" />
+    <Compile Include="TechnicalData\Projections.fs" />
+    <Compile Include="TechnicalData\Behaviour.fs" />
+    <Compile Include="MachineType\Events.fs" />
+    <Compile Include="MachineType\Projections.fs" />
+    <Compile Include="MachineType\ReadModels.fs" />
+    <Compile Include="MachineType\Behaviour.fs" />
     <Compile Include="Order\Events.fs" />
     <Compile Include="Order\Projections.fs" />
     <Compile Include="Order\ReadModels.fs" />

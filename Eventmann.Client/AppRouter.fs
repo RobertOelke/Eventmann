@@ -17,14 +17,14 @@ module AppRouter =
       prop.children [
         match url with
         | [] -> Html.text "Home"
-        | [ "vacuum-type" ] -> VacuumTypePage.Render()
+        | [ "machine-type" ] -> MachineTypePage.Render()
         | [ "add-order" ] -> AddOrderPage.Render()
         | [ "new-orders" ] -> NewOrdersPage.Render()
         | [ "sketch" ] -> SketchPage.Render()
         | [ "construction" ] -> ConstructionPage.Render()
-        | [ "montage" ] -> MontagePage.Render()
         | [ "shipping" ] -> ShippingPage.Render()
         | [ "completed-orders" ] -> CompletedOrdersPage.Render()
+        | [ "technical-data" ] -> TechnicalDataPage.Render()
         | _ ->  Html.text "Not found"
       ]
     ]

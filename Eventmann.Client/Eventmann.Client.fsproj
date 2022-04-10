@@ -6,12 +6,12 @@
 		<None Include="styles/global.scss" />
 		<None Include="index.html" />
 		<Compile Include="Apis.fs" />
-		<Compile Include="Pages\VacuumTypePage.fs" />
+		<Compile Include="Pages\MachineTypePage.fs" />
+		<Compile Include="Pages\TechnicalDataPage.fs" />
 		<Compile Include="Pages\AddOrderPage.fs" />
 		<Compile Include="Pages\NewOrdersPage.fs" />
 		<Compile Include="Pages\SketchPage.fs" />
 		<Compile Include="Pages\ConstructionPage.fs" />
-		<Compile Include="Pages\MontagePage.fs" />
 		<Compile Include="Pages\ShippingPage.fs" />
 		<Compile Include="Pages\CompletedOrdersPage.fs" />
         <Compile Include="AppMenu.fs" />
@@ -24,6 +24,7 @@
         <PackageReference Include="Fable.Remoting.Client" Version="7.19.0" />
         <PackageReference Include="Feliz" Version="1.57.0" />
         <PackageReference Include="Feliz.Bulma" Version="2.18.0" />
+        <PackageReference Include="Feliz.Bulma.Checkradio" Version="2.0.0" />
         <PackageReference Include="Feliz.Bulma.DateTimePicker" Version="2.1.0" />
         <PackageReference Include="Feliz.Bulma.PageLoader" Version="2.0.0" />
         <PackageReference Include="Feliz.Bulma.Timeline" Version="2.1.0" />

@@ -1,21 +1,20 @@
-﻿namespace Eventmann.Shared.VacuumType
+﻿namespace Eventmann.Shared.MachineType
 
 open System
 
-type VacuumType = {
+type MachineType = {
   Category : string
   Name : string
   Colour : string
   Descriptions : string list
   Sketch : int
   Construction : int
-  Montage : int
   Shipping : int
   IsDeleted : bool
 }
 
 [<CLIMutable>]
-type VacuumTypeOverview = {
+type MachineTypeOverview = {
   Id : Guid
   Category : string
   Name : string
@@ -23,7 +22,7 @@ type VacuumTypeOverview = {
   Descriptions : string
 }
 
-type VacuumTypeHistory = {
+type MachineTypeHistory = {
   Date : DateTime
   Action : string
 }

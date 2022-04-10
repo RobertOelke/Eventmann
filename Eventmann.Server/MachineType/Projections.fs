@@ -1,12 +1,12 @@
-﻿namespace Eventmann.Server.VacuumType
+﻿namespace Eventmann.Server.MachineType
 
 open System
-open Eventmann.Shared.VacuumType
+open Eventmann.Shared.MachineType
 open Kairos.Server
 
 [<RequireQualifiedAccess>]
-module VacuumType =
-  let projection : Projection<VacuumType, VacuumTypeEvent> =
+module MachineType =
+  let projection : Projection<MachineType, MachineTypeEvent> =
     let zero = {
       Category = ""
       Name = ""
@@ -14,7 +14,6 @@ module VacuumType =
       Colour = "black"
       Sketch = 0
       Construction = 0
-      Montage = 0
       Shipping = 0
       IsDeleted = false
     }
@@ -28,8 +27,6 @@ module VacuumType =
       | SketchShortened args -> { state with Sketch = state.Sketch - args.Days }
       | ConstructionExtended args -> { state with Construction = state.Construction + args.Days }
       | ConstructionShortened args -> { state with Construction = state.Construction - args.Days }
-      | MontageExtended args -> { state with Montage = state.Montage + args.Days } 
-      | MontageShortened args -> { state with Montage = state.Montage - args.Days }
       | ShippingExtended args -> { state with Shipping = state.Shipping + args.Days }
       | ShippingShortened args -> { state with Shipping = state.Shipping - args.Days }
       | Deleted -> { state with IsDeleted = true }

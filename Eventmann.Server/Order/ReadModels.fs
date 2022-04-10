@@ -4,27 +4,35 @@ open System
 open Eventmann.Shared.Order
 open Kairos.Server
 
-module InMemoryOrders =
+type InMemoryOrders =
+  {
+    Notify : EventData<OrderEvent> -> unit
+    GetForPhase : OrderPhase -> Async<Aggregate<Order> list>
+  }
+  interface IEventConsumer<OrderEvent> with
+    member this.Notify event = this.Notify event
+
+module InMemoryOrdersReadModel =
   
-  type private InMemoryOrderMsg =
+  type private InMemoryOrderReadModelMsg =
   | Start
   | NewEvent of EventData<OrderEvent>
-  | GetForPhase of OrderPhase * AsyncReplyChannel<Map<EventSource, Order>>
+  | GetForPhase of OrderPhase * AsyncReplyChannel<Aggregate<Order> list>
 
-  let readModel
+  let create
     (store : IEventStore<OrderEvent>)
     (projection : Projection<Order, OrderEvent>)
-    (bus : IEventBus) =
+    =
     
-    let handleEvent (store : Map<EventSource, Order>) (event : EventData<OrderEvent>) =
+    let handleEvent (store : Aggregate<Order> list) (event : EventData<OrderEvent>) =
       let projection =
-        match store.TryGetValue event.Source with
-        | true, state -> { projection with Zero = state }
-        | false, _ -> projection
+        match store |> List.tryFind (fun a -> a.Source = event.Source) with
+        | Some state -> { projection with Zero = state.State }
+        | None -> projection
       
       let newState = [ event ] |> Projection.project projection
 
-      store |> Map.add event.Source newState.Value.State
+      newState.Value :: (store |> List.filter (fun a -> a.Source <> event.Source))
 
     let update models =
       function
@@ -42,15 +50,17 @@ module InMemoryOrders =
       | GetForPhase (phase, reply) ->
         async {
           models
-          |> Map.filter (fun _ value -> true)
+          |> List.filter (fun value -> true)
           |> reply.Reply
 
           return models
         }
 
-    let agent = StatefullAgent<_,_>.Start(Map.empty, update)
+    let agent = StatefullAgent<_,_>.Start([], update)
     agent.Post Start
-    bus.OnEvent().Subscribe(NewEvent >> agent.Post) |> ignore
-  
-    (fun phase -> agent.PostAndAsyncReply(fun r -> GetForPhase (phase, r)))
+
+    {
+      Notify = (NewEvent >> agent.Post)
+      GetForPhase = fun phase -> agent.PostAndAsyncReply(fun r -> GetForPhase (phase, r))
+    }
       

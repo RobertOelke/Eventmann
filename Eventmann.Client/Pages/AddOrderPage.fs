@@ -6,7 +6,7 @@ open Feliz.Bulma
 open Eventmann.Client
 open Eventmann.Shared
 open Eventmann.Shared.Order
-open Eventmann.Shared.VacuumType
+open Eventmann.Shared.MachineType
 
 module AddOrderPage =
   
@@ -14,7 +14,7 @@ module AddOrderPage =
     SerialNumber : string
     Customer : string
     ModelName : string
-    VacuumType : Guid
+    MachineType : Guid
     DeliveryDate : DateTime option
   }
 
@@ -22,13 +22,13 @@ module AddOrderPage =
     SerialNumber = ""
     Customer = ""
     ModelName = ""
-    VacuumType = Guid.Empty
+    MachineType = Guid.Empty
     DeliveryDate = None
   }
 
   let loadMachineTypes setter () =
     async {
-      let! types = Apis.vacuumType.GetAll()
+      let! types = Apis.machineType.GetAll()
       setter types
     } |> Async.StartImmediate
 
@@ -65,13 +65,13 @@ module AddOrderPage =
         ]
       ]
       Bulma.field.div [
-        Bulma.label "Vaccum type"
+        Bulma.label "Machine type"
         Bulma.control.div [
           prop.children [
             Bulma.select [
               select.isFullWidth
-              prop.value state.VacuumType
-              prop.onChange (update (fun (value : string) s -> { s  with VacuumType = Guid value }))
+              prop.value state.MachineType
+              prop.onChange (update (fun (value : string) s -> { s  with MachineType = Guid value }))
               prop.children [
                 yield!
                   machineTypes
@@ -109,7 +109,7 @@ module AddOrderPage =
               || state.ModelName = ""
               || state.SerialNumber = ""
               || state.Customer = ""
-              || state.VacuumType = Guid.Empty
+              || state.MachineType = Guid.Empty
             )
             prop.onClick (fun _ ->
               async {
@@ -117,8 +117,8 @@ module AddOrderPage =
                   SerialNumber = state.SerialNumber
                   Customer = state.Customer
                   ModelName = state.ModelName
-                  VacuumType = state.VacuumType
-                  DeliveryDate = state.DeliveryDate.Value
+                  MachineType = state.MachineType
+                  DeliveryDate = DateOnly.FromDateTime(state.DeliveryDate.Value)
                 }
                 do! Apis.order.PlaceOrder newOrder
                 setState empty

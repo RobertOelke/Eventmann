@@ -9,6 +9,7 @@
   "dependencies": {
     "bulma": "^0.9.3",
     "bulma-calendar": "^6.1.17",
+    "bulma-checkradio": "^1.1.1",
     "bulma-pageloader": "^0.3.0",
     "bulma-timeline": "^3.0.5",
     "date-fns": "^2.16.1",

@@ -1,6 +1,6 @@
-﻿namespace Eventmann.Server.VacuumType
+﻿namespace Eventmann.Server.MachineType
 
-type VacuumTypeEvent =
+type MachineTypeEvent =
 | Created of {| Category : string; Name : string |}
 | DescriptionAdded of {| Description : string |}
 | DescriptionRemoved of {| Description : string |}
@@ -9,8 +9,6 @@ type VacuumTypeEvent =
 | SketchShortened of {| Days : int |}
 | ConstructionExtended of {| Days : int |}
 | ConstructionShortened of {| Days : int |}
-| MontageExtended of {| Days : int |}
-| MontageShortened of {| Days : int |}
 | ShippingExtended of {| Days : int |}
 | ShippingShortened of {| Days : int |}
 | Deleted

@@ -15,6 +15,7 @@ let main args =
       subRoute "/api" (choose [
         Apis.machineType EventSourcedRoot.cmd EventSourcedRoot.query
         Apis.order EventSourcedRoot.cmd EventSourcedRoot.query
+        Apis.technicalData EventSourcedRoot.cmd EventSourcedRoot.query
       ])
     ]
 
@@ -32,8 +33,6 @@ let main args =
   let app = builder.Build()
   app.UseGiraffe(webApp)
   app.UseHttpLogging() |> ignore
-
-  app.MapGet("/", Func<string>(fun () -> "Hello World!")) |> ignore
 
   app.Run()
 
