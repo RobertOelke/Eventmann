@@ -15,7 +15,9 @@ type MachineTypeApi = {
 
 type OrderApi = {
   PlaceOrder : NewOrder -> Async<unit>
-  GetOrders : OrderPhase -> Async<Order list>
+  GetOrders : OrderPhase -> Async<(Guid * Order) list>
+  GetBySrc : Guid -> Async<Order>
+  Update : Guid -> OrderCommand -> Async<unit>
 }
 
 type TechnicalDataApi = {

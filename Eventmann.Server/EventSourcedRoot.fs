@@ -74,6 +74,13 @@ module EventSourcedRoot =
     let getForPhase : QueryHander<OrderPhase, Aggregate<Order> list> =
       QueryHander (inMemoryOrderReadModel.GetForPhase)
 
+    let getBySrc : QueryHander<EventSource, Order option> =
+      QueryHander (fun src ->
+        async {
+          let! model = inMemoryOrderReadModel.GetBySrc src
+          return model |> Option.map (fun a -> a.State)
+        })
+
     let commandHandler (getMachineType : QueryHander<EventSource, MachineType option>) =
       CommandHandler (fun src cmd ->
         async {
@@ -129,6 +136,7 @@ module EventSourcedRoot =
     |> EventSourced.addConsumer MachineType.overviewReadModel
     // Orders
     |> EventSourced.addQueryHandler Order.getForPhase
+    |> EventSourced.addQueryHandler Order.getBySrc
     |> EventSourced.addCommandHandler (Order.commandHandler MachineType.details)
     |> EventSourced.addProducer Order.store
     |> EventSourced.addConsumer Order.inMemoryOrderReadModel

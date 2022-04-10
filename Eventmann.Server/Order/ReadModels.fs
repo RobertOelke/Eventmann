@@ -8,6 +8,7 @@ type InMemoryOrders =
   {
     Notify : EventData<OrderEvent> -> unit
     GetForPhase : OrderPhase -> Async<Aggregate<Order> list>
+    GetBySrc : EventSource -> Async<Aggregate<Order> option>
   }
   interface IEventConsumer<OrderEvent> with
     member this.Notify event = this.Notify event
@@ -18,11 +19,11 @@ module InMemoryOrdersReadModel =
   | Start
   | NewEvent of EventData<OrderEvent>
   | GetForPhase of OrderPhase * AsyncReplyChannel<Aggregate<Order> list>
+  | GetBySrc of EventSource * AsyncReplyChannel<Aggregate<Order> option>
 
   let create
     (store : IEventStore<OrderEvent>)
-    (projection : Projection<Order, OrderEvent>)
-    =
+    (projection : Projection<Order, OrderEvent>) =
     
     let handleEvent (store : Aggregate<Order> list) (event : EventData<OrderEvent>) =
       let projection =
@@ -50,7 +51,15 @@ module InMemoryOrdersReadModel =
       | GetForPhase (phase, reply) ->
         async {
           models
-          |> List.filter (fun value -> true)
+          |> List.filter (fun value -> value.State.CurrentPhase = phase)
+          |> reply.Reply
+
+          return models
+        }
+      | GetBySrc (src, reply) ->
+        async {
+          models
+          |> List.tryFind (fun value -> value.Source = src)
           |> reply.Reply
 
           return models
@@ -62,5 +71,6 @@ module InMemoryOrdersReadModel =
     {
       Notify = (NewEvent >> agent.Post)
       GetForPhase = fun phase -> agent.PostAndAsyncReply(fun r -> GetForPhase (phase, r))
+      GetBySrc = fun src -> agent.PostAndAsyncReply(fun r -> GetBySrc (src, r))
     }
       

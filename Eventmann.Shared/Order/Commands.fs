@@ -2,7 +2,6 @@
 
 open System
 
-
 type NewOrder = {
   SerialNumber : string
   Customer : string
@@ -13,7 +12,8 @@ type NewOrder = {
 
 type OrderCommand =
 | PlaceOrder of NewOrder
-// | FinishPlanning
+| UpdateTechicalData of Map<string, string>
+| FinishPlanning
 // | StartSketch
 // | FinishSketch
 // 

@@ -34,7 +34,7 @@ module Apis =
         | CommandResult.Error exn -> printfn "Error: %s" exn.Message
       }
 
-    let create = update (Guid.NewGuid())
+    let create cmd = update (Guid.NewGuid()) cmd
 
     let getLog (uid : EventSource) : Async<MachineTypeHistory list> =
       async {
@@ -65,22 +65,34 @@ module Apis =
         | CommandResult.Error exn -> printfn "Error: %s" exn.Message
       }
 
-    let getOrders (phase : OrderPhase) : Async<Order list> =
+    let getOrders (phase : OrderPhase) : Async<(Guid * Order) list> =
       async {
         match! queryHandler.TryHandle<OrderPhase, List<Aggregate<Order>>> phase with
         | QueryResult.Ok orders ->
           return
             orders
-            |> List.map (fun o -> o.State)
+            |> List.map (fun o -> (o.Source, o.State))
           
         | _ -> return []
       }
 
-    let create = update (Guid.NewGuid())
+    let getBySrc (src : Guid) : Async<Order> =
+      async {
+        match! queryHandler.TryHandle<Guid, Order option> src with
+        | QueryResult.Ok (Some order) ->
+          return order
+        | QueryResult.Ok None -> return failwith "Not Found"
+          
+        | QueryResult.Error exn -> return failwith exn.Message
+      }
+
+    let create cmd = update (Guid.NewGuid()) cmd
   
     let api : OrderApi = {
       PlaceOrder = OrderCommand.PlaceOrder >> create
       GetOrders = getOrders
+      GetBySrc = getBySrc
+      Update = update
     }
 
     Remoting.createApi ()

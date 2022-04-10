@@ -36,8 +36,20 @@ module OrderBehaviour =
                 Shipping = mt.Shipping
               |}
             ]
+        | _ -> return []
 
       | Some state ->
         match cmd with
         | PlaceOrder order -> return []
+        | UpdateTechicalData data -> 
+          return [
+            for (title, value) in data |> Map.toSeq do
+              let currentValue = state.State.AdditionalData |> Map.tryFind title |> Option.defaultValue ""
+              if (currentValue <> value) then
+                UpdatedTechnicalData {| Title = title; Value = value|}
+          ]
+        | FinishPlanning ->
+          match state.State.CurrentPhase with
+          | Pending -> return [ PlanningFinished ]
+          | _ -> return []
     }

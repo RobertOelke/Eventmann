@@ -50,7 +50,12 @@ module Order =
         }
 
       | PeriodsInitialized args ->
-        state
-        |> fillPhases args.Sketch args.Construction args.Shipping
+        state |> fillPhases args.Sketch args.Construction args.Shipping
+
+      | UpdatedTechnicalData args ->
+        { state with AdditionalData = state.AdditionalData |> Map.add args.Title args.Value }
+
+      | PlanningFinished ->
+        { state with CurrentPhase = Sketch }
 
     { Zero = zero; Update = update }
