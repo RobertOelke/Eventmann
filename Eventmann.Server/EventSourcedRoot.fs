@@ -162,4 +162,5 @@ module EventSourcedRoot =
     |> EventSourced.addCommandHandler TechnicalData.commandHandler
     |> EventSourced.addProducer TechnicalData.store
     // Build
+    |> EventSourced.addConsumer (OrderEventPublisher())
     |> EventSourced.build
